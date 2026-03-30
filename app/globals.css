@@ -825,12 +825,25 @@ h1, h2, h3, h4 {
   }
 
   .hero {
-    padding: 120px 24px 120px;
+    padding: 100px 24px 160px;
+    min-height: 100svh;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
   }
 
   .hero-stats-bar {
     padding: 20px 24px;
-    gap: 24px;
+    gap: 16px;
     flex-wrap: wrap;
   }
 
@@ -884,7 +897,7 @@ h1, h2, h3, h4 {
 
 @media (max-width: 575px) {
   .hero-stats-bar {
-    gap: 16px;
+    gap: 12px;
   }
 
   .hero-stat {

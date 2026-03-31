@@ -592,7 +592,7 @@ export default function Home() {
           Get in Touch &rarr;
         </a>
         <p style={{ marginTop: '24px', fontSize: '14px', opacity: 0.8 }}>
-          robert@workingvoices.com &nbsp;|&nbsp; +44 203 865 5325
+          robert@workingvoices.com
         </p>
       </section>
 
@@ -616,7 +616,6 @@ export default function Home() {
           </div>
           <div className="footer-contact">
             <a href="mailto:robert@workingvoices.com">robert@workingvoices.com</a>
-            <a href="tel:+442038655325">+44 203 865 5325</a>
           </div>
         </div>
       </footer>

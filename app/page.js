@@ -44,6 +44,20 @@ export default function Home() {
             <a href="#programme" className="btn-secondary">Explore the Programme</a>
           </div>
         </div>
+        {/* Hero image panel */}
+        <div className="hero-image-panel">
+          <div className="hero-img-wrap">
+            <img
+              src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=900&q=80&fit=crop"
+              alt="Business professional in a video call"
+            />
+            <div className="hero-img-overlay"></div>
+            <div className="hero-img-badge">
+              <span className="img-badge-dot"></span>
+              Live deepfake attack — in progress
+            </div>
+          </div>
+        </div>
         <div className="hero-stats-bar">
           <div className="hero-stat">
             <div className="hero-stat-number">73%</div>
@@ -470,9 +484,7 @@ export default function Home() {
               </div>
             </div>
             <p className="about-founder">Founder &amp; CEO: <strong>Nick Smallman</strong></p>
-          </div>
-          <div className="about-logos-wrap">
-            <p className="logos-label">Trusted by</p>
+            <div className="logos-label" style={{ marginTop: '32px' }}>Trusted by</div>
             <div className="logos-grid">
               <div className="logo-item">NASA</div>
               <div className="logo-item">Barclays</div>
@@ -480,6 +492,24 @@ export default function Home() {
               <div className="logo-item">Rolex</div>
               <div className="logo-item">BlackRock</div>
               <div className="logo-item">Nomura</div>
+            </div>
+          </div>
+          <div className="about-image-stack">
+            <div className="about-img-main">
+              <img
+                src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=700&q=80&fit=crop"
+                alt="Working Voices training session"
+              />
+            </div>
+            <div className="about-img-secondary">
+              <img
+                src="https://images.unsplash.com/photo-1551836022-4c4c79ecde51?w=400&q=80&fit=crop"
+                alt="Professional keynote presentation"
+              />
+            </div>
+            <div className="about-img-badge">
+              <div className="about-img-badge-num">Berkeley Square</div>
+              <div className="about-img-badge-label">London</div>
             </div>
           </div>
         </div>

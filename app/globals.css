@@ -1270,16 +1270,34 @@ h1, h2, h3, h4 {
 }
 
 .logo-item {
-  background: var(--gray-light);
+  background: var(--white);
   border: 1px solid #e8ecf1;
   border-radius: 10px;
-  padding: 16px 12px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--navy);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  transition: box-shadow 0.2s;
+}
+
+.logo-item:hover {
+  box-shadow: 0 4px 16px rgba(3,16,27,0.08);
+}
+
+.logo-item img {
+  max-height: 32px;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.6;
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.logo-item:hover img {
+  filter: grayscale(0%);
+  opacity: 1;
 }
 
 /* ─── SECTION YELLOW (Working Voices brand accent) ─── */

@@ -486,12 +486,12 @@ export default function Home() {
             <p className="about-founder">Founder &amp; CEO: <strong>Nick Smallman</strong></p>
             <div className="logos-label" style={{ marginTop: '32px' }}>Trusted by</div>
             <div className="logos-grid">
-              <div className="logo-item">NASA</div>
-              <div className="logo-item">Barclays</div>
-              <div className="logo-item">Microsoft</div>
-              <div className="logo-item">Rolex</div>
-              <div className="logo-item">BlackRock</div>
-              <div className="logo-item">Nomura</div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/nasa.gov" alt="NASA" /></div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/barclays.com" alt="Barclays" /></div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" /></div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/rolex.com" alt="Rolex" /></div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/blackrock.com" alt="BlackRock" /></div>
+              <div className="logo-item"><img src="https://logo.clearbit.com/nomura.com" alt="Nomura" /></div>
             </div>
           </div>
           <div className="about-image-stack">

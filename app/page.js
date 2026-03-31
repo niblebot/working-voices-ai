@@ -31,6 +31,13 @@ export default function Home() {
 
       {/* HERO */}
       <section className="hero">
+        {/* Full-width image panel sits behind everything */}
+        <div className="hero-image-panel">
+          <div className="hero-img-wrap">
+            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1400&q=80&fit=crop" alt="" aria-hidden="true" />
+            <div className="hero-img-overlay"></div>
+          </div>
+        </div>
         <div className="hero-grid-bg"></div>
         <div className="hero-glow"></div>
         <div className="hero-glow hero-glow-2"></div>

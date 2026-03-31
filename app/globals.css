@@ -275,10 +275,11 @@ h1, h2, h3, h4 {
 /* ─── HERO IMAGE PANEL ─── */
 .hero-image-panel {
   position: absolute;
+  left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  width: 58%;
+  width: 100%;
   z-index: 1;
   overflow: hidden;
 }
@@ -293,6 +294,7 @@ h1, h2, h3, h4 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: right center;
   filter: grayscale(30%) brightness(0.7);
 }
 
@@ -301,11 +303,11 @@ h1, h2, h3, h4 {
   inset: 0;
   background: linear-gradient(90deg,
     var(--navy) 0%,
-    rgba(3,16,27,0.98) 8%,
-    rgba(3,16,27,0.88) 20%,
-    rgba(3,16,27,0.65) 38%,
-    rgba(3,16,27,0.32) 58%,
-    rgba(3,16,27,0.1) 78%,
+    var(--navy) 30%,
+    rgba(3,16,27,0.95) 42%,
+    rgba(3,16,27,0.75) 54%,
+    rgba(3,16,27,0.4) 68%,
+    rgba(3,16,27,0.12) 84%,
     transparent 100%
   );
 }

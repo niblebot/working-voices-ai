@@ -278,7 +278,7 @@ h1, h2, h3, h4 {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 42%;
+  width: 58%;
   z-index: 1;
   overflow: hidden;
 }
@@ -299,7 +299,7 @@ h1, h2, h3, h4 {
 .hero-img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--navy) 0%, rgba(3,16,27,0.3) 60%, transparent 100%);
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy) 5%, rgba(3,16,27,0.85) 30%, rgba(3,16,27,0.2) 70%, transparent 100%);
 }
 
 .hero-img-badge {

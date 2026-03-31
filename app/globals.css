@@ -138,10 +138,21 @@ h1, h2, h3, h4 {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(22, 119, 248, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(22, 119, 248, 0.18) 0%, transparent 70%);
   top: -100px;
   right: -100px;
   animation: glowFloat 12s ease-in-out infinite;
+}
+
+.hero-glow-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 253, 168, 0.06) 0%, transparent 70%);
+  top: auto;
+  bottom: 60px;
+  right: auto;
+  left: 30%;
+  animation-delay: -6s;
 }
 
 @keyframes glowFloat {
@@ -822,6 +833,167 @@ h1, h2, h3, h4 {
   color: var(--blue);
 }
 
+/* ─── SECTION YELLOW (Working Voices brand accent) ─── */
+.section-yellow {
+  background: var(--yellow);
+}
+
+/* ─── LIVE LEARNING GRID ─── */
+.live-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.live-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 36px 28px;
+  border: 1px solid rgba(3, 16, 27, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.live-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), rgba(22, 119, 248, 0.3));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.live-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(3, 16, 27, 0.1);
+}
+
+.live-card:hover::after {
+  opacity: 1;
+}
+
+.live-card-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(22, 119, 248, 0.08);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.live-card h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: var(--navy);
+}
+
+.live-card p {
+  font-size: 15px;
+  color: var(--gray-dark);
+  line-height: 1.7;
+}
+
+/* ─── VULNERABILITY SECTION ─── */
+.vuln-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 64px;
+  max-width: 1200px;
+  margin: 0 auto 48px;
+  align-items: start;
+}
+
+.vuln-intro h2 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+.vuln-intro p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.8;
+}
+
+.vuln-biases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.bias-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 28px 24px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.bias-card:hover {
+  background: rgba(22, 119, 248, 0.08);
+  border-color: rgba(22, 119, 248, 0.2);
+}
+
+.bias-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  color: rgba(22, 119, 248, 0.3);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.bias-card h4 {
+  font-size: 17px;
+  color: var(--white);
+  margin-bottom: 10px;
+  font-family: 'Red Hat Display', sans-serif;
+  font-weight: 700;
+}
+
+.bias-card p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+}
+
+.vuln-callout {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vuln-callout-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: rgba(255, 253, 168, 0.06);
+  border: 1px solid rgba(255, 253, 168, 0.2);
+  border-radius: 16px;
+  padding: 32px 36px;
+}
+
+.vuln-callout-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vuln-callout-inner p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.8;
+}
+
+.vuln-callout-inner strong {
+  color: var(--yellow);
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 991px) {
   .nav {
@@ -890,6 +1062,25 @@ h1, h2, h3, h4 {
     grid-template-columns: 1fr;
   }
 
+  .live-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vuln-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .vuln-biases {
+    grid-template-columns: 1fr;
+  }
+
+  .vuln-callout-inner {
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+  }
+
   .stats-banner {
     padding: 48px 24px;
   }
@@ -909,6 +1100,17 @@ h1, h2, h3, h4 {
 
   .footer-contact {
     text-align: center;
+  }
+}
+
+/* Tablet: 2-col live grid */
+@media (min-width: 576px) and (max-width: 991px) {
+  .live-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .vuln-biases {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

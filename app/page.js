@@ -23,7 +23,7 @@ export default function Home() {
         <ul className={`nav-links${menuOpen ? ' open' : ''}`}>
           <li><a href="#threat" onClick={() => setMenuOpen(false)}>The Threat</a></li>
           <li><a href="#programme" onClick={() => setMenuOpen(false)}>Programme</a></li>
-          <li><a href="#why" onClick={() => setMenuOpen(false)}>Why It Works</a></li>
+          <li><a href="#live-learning" onClick={() => setMenuOpen(false)}>Our Approach</a></li>
           <li><a href="#scenario" onClick={() => setMenuOpen(false)}>Real-World Attacks</a></li>
           <li><a href="#contact" className="nav-cta" onClick={() => setMenuOpen(false)}>Book a Talk</a></li>
         </ul>
@@ -33,6 +33,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid-bg"></div>
         <div className="hero-glow"></div>
+        <div className="hero-glow hero-glow-2"></div>
         <div className="hero-content">
           <div className="hero-badge">AI Threat Defence Training</div>
           <h1>
@@ -232,11 +233,183 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── NEW: WHY LIVE LEARNING ── */}
+      <section className="section section-yellow" id="live-learning">
+        <div className="section-header">
+          <span className="section-label" style={{ color: '#03101B' }}>Why Live Sessions</span>
+          <h2 style={{ color: '#03101B' }}>Human Interaction You Can&apos;t Download</h2>
+          <p style={{ color: '#505050' }}>
+            eLearning can teach facts. It cannot change behaviour under pressure.
+            That requires a very different kind of training.
+          </p>
+        </div>
+        <div className="live-grid">
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* Brain / thinking icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.16z"/>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.16z"/>
+              </svg>
+            </div>
+            <h3>Behaviour Changes in the Room</h3>
+            <p>
+              Psychological self-defence isn&apos;t a concept you learn &mdash; it&apos;s a reflex you
+              build. Live facilitation creates the emotional context needed for real
+              behavioural change. eLearning creates awareness. We create resilience.
+            </p>
+          </div>
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* People/group icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Shared Experience Builds Culture</h3>
+            <p>
+              When a team goes through a deepfake reveal together, it becomes a shared
+              reference point &mdash; a moment they talk about. That cultural memory is what
+              keeps people vigilant long after the training ends.
+            </p>
+          </div>
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* Zap / energy icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h3>Emotional Impact Drives Retention</h3>
+            <p>
+              We remember what shocks us. A live demonstration where your own colleague
+              &mdash; or your own voice &mdash; appears as a deepfake creates the kind of
+              visceral understanding that no video module ever could.
+            </p>
+          </div>
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* Refresh / adaptive icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <polyline points="23 20 23 14 17 14"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+              </svg>
+            </div>
+            <h3>Tailored to Your Organisation</h3>
+            <p>
+              A skilled facilitator reads the room, adapts to your industry&apos;s specific
+              threat profile, and answers the questions your people are actually asking.
+              No algorithm does that.
+            </p>
+          </div>
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* Target icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+            </div>
+            <h3>Practice Under Pressure</h3>
+            <p>
+              Role-play scenarios, live simulations, and group challenges let people
+              practise the &ldquo;pause and verify&rdquo; habit in a safe environment &mdash;
+              so it becomes instinctive when it matters most.
+            </p>
+          </div>
+          <div className="live-card">
+            <div className="live-card-icon">
+              {/* Trending up icon */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1677F8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+            <h3>Measurable Results</h3>
+            <p>
+              Our simulated deepfake testing phase provides hard data on vulnerability
+              before and after training &mdash; giving your board concrete evidence that
+              the investment is working.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── NEW: UNDERSTANDING YOUR VULNERABILITY ── */}
+      <section className="section section-dark" id="vulnerability">
+        <div className="vuln-layout">
+          <div className="vuln-intro">
+            <span className="section-label">Understanding Your Own Vulnerability</span>
+            <h2>Why Smart People Get Fooled</h2>
+            <p>
+              The uncomfortable truth about AI-generated attacks is that intelligence is no protection.
+              Fraudsters don&apos;t exploit ignorance &mdash; they exploit the very cognitive shortcuts
+              that make high-performing people effective.
+            </p>
+            <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.6)' }}>
+              Understanding your own psychological architecture is the first step to defending it.
+            </p>
+          </div>
+          <div className="vuln-biases">
+            <div className="bias-card">
+              <div className="bias-number">01</div>
+              <h4>Authority Bias</h4>
+              <p>When a request appears to come from the CEO, our brain downregulates scepticism.
+              AI attackers exploit this by creating flawless impersonations of senior leadership,
+              deliberately triggering deference before rational thought kicks in.</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">02</div>
+              <h4>Urgency &amp; Scarcity</h4>
+              <p>Phrases like &ldquo;this must be done today&rdquo; or &ldquo;don&apos;t discuss this with anyone yet&rdquo;
+              deliberately bypass deliberate thinking. Urgency narrows attention, suppresses
+              doubt, and dramatically increases compliance.</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">03</div>
+              <h4>Familiarity &amp; Trust</h4>
+              <p>Attackers study their targets for weeks before striking &mdash; referencing real
+              projects, known colleagues, and recent events. Familiarity creates comfort.
+              Comfort suspends verification. That&apos;s the attack vector.</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">04</div>
+              <h4>Confirmation Bias</h4>
+              <p>Once we believe something is legitimate &mdash; a credible email, a familiar face
+              on a call &mdash; we unconsciously filter out signals that contradict it. Our
+              training builds the habit of actively seeking disconfirming evidence.</p>
+            </div>
+          </div>
+        </div>
+        <div className="vuln-callout">
+          <div className="vuln-callout-inner">
+            <div className="vuln-callout-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFDA8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <p>
+              <strong>The goal isn&apos;t to make your people paranoid.</strong> It&apos;s to give them
+              the intellectual humility to pause, the emotional presence to notice when
+              something feels off, and the confidence to verify &mdash; even when under pressure
+              from apparent authority.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* WHY IT WORKS */}
       <section className="section section-gray" id="why">
         <div className="why-grid">
           <div className="why-content">
-            <span className="section-label">The Approach</span>
+            <span className="section-label">The Working Voices Difference</span>
             <h2>Psychological Self-Defence</h2>
             <p>
               Traditional cybersecurity training tells people what to watch for. But
@@ -408,11 +581,11 @@ export default function Home() {
           Book the Accelerator Talk for your leadership team and see how AI-generated
           attacks could target your people &mdash; before a real attacker does.
         </p>
-        <a href="mailto:emea@workingvoices.com?subject=AI%20Threat%20Training%20Enquiry" className="btn-white">
+        <a href="mailto:robert@workingvoices.com?subject=AI%20Threat%20Training%20Enquiry" className="btn-white">
           Get in Touch &rarr;
         </a>
         <p style={{ marginTop: '24px', fontSize: '14px', opacity: 0.8 }}>
-          emea@workingvoices.com &nbsp;|&nbsp; +44 203 865 5325
+          robert@workingvoices.com &nbsp;|&nbsp; +44 203 865 5325
         </p>
       </section>
 
@@ -435,7 +608,7 @@ export default function Home() {
             </a>
           </div>
           <div className="footer-contact">
-            <a href="mailto:emea@workingvoices.com">emea@workingvoices.com</a>
+            <a href="mailto:robert@workingvoices.com">robert@workingvoices.com</a>
             <a href="tel:+442038655325">+44 203 865 5325</a>
           </div>
         </div>

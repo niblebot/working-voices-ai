@@ -130,7 +130,7 @@ export default async function Home() {
             <div className="stat-source">UK Home Office, 2024</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">Every 5 min</div>
+            <div className="stat-number">Every 5 mins</div>
             <div className="stat-label">A deepfake attack is attempted globally</div>
             <div className="stat-source">Entrust, 2024</div>
           </div>

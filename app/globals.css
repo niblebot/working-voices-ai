@@ -497,6 +497,7 @@ h1, h2, h3, h4 {
   font-size: clamp(36px, 4vw, 52px);
   color: var(--blue);
   margin-bottom: 8px;
+  white-space: nowrap;
 }
 
 .stat-item .stat-label {

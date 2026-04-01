@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Nav from './Nav';
 import { defaultContent } from '@/lib/content';
 

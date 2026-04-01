@@ -1,0 +1,40 @@
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { kv } from '@vercel/kv';
+import { defaultContent } from '@/lib/content';
+
+function isAuthed(cookieStore) {
+  return cookieStore.get('admin_auth')?.value === process.env.ADMIN_PASSWORD;
+}
+
+export async function GET() {
+  try {
+    const stored = await kv.get('site_content');
+    const content = stored ? { ...defaultContent, ...stored } : defaultContent;
+    return NextResponse.json(content);
+  } catch {
+    return NextResponse.json(defaultContent);
+  }
+}
+
+export async function POST(request) {
+  const cookieStore = await cookies();
+  if (!isAuthed(cookieStore)) {
+    return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
+  }
+
+  const updates = await request.json();
+  // Only allow keys that exist in defaultContent
+  const safe = {};
+  for (const key of Object.keys(defaultContent)) {
+    if (updates[key] !== undefined) safe[key] = updates[key];
+  }
+
+  try {
+    const existing = (await kv.get('site_content')) || {};
+    await kv.set('site_content', { ...existing, ...safe });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

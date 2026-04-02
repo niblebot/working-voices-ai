@@ -283,22 +283,22 @@ export default async function Home() {
             <div className="bias-card">
               <div className="bias-number">01</div>
               <h4>Authority Bias</h4>
-              <p>When a request appears to come from the CEO, our brain downregulates scepticism. AI attackers exploit this by creating flawless impersonations of senior leadership, deliberately triggering deference before rational thought kicks in.</p>
+              <p>When a request appears to come from the CEO, the brain downgrades scepticism. AI attackers exploit this weakness by creating flawless impersonations of senior leadership, deliberately triggering deference before rational thought can kick in.</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">02</div>
               <h4>Urgency &amp; Scarcity</h4>
-              <p>Phrases like &ldquo;this must be done today&rdquo; or &ldquo;don&apos;t discuss this with anyone yet&rdquo; deliberately bypass deliberate thinking. Urgency narrows attention, suppresses doubt, and dramatically increases compliance.</p>
+              <p>Phrases like &ldquo;this must be done today&rdquo; or &ldquo;don&apos;t discuss this with anyone yet&rdquo; create acquiescence. Urgency narrows attention, suppresses doubt, and dramatically increases compliance.</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">03</div>
               <h4>Familiarity &amp; Trust</h4>
-              <p>Attackers study their targets for weeks before striking &mdash; referencing real projects, known colleagues, and recent events. Familiarity creates comfort. Comfort suspends verification. That&apos;s the attack vector.</p>
+              <p>Attackers study their targets for weeks before striking &mdash; referencing real projects, known colleagues, and recent events. Familiarity creates comfort. Comfort overrides verification. That&apos;s the attack vector.</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">04</div>
               <h4>Confirmation Bias</h4>
-              <p>Once we believe something is legitimate &mdash; a credible email, a familiar face on a call &mdash; we unconsciously filter out signals that contradict it. Our training builds the habit of actively seeking disconfirming evidence.</p>
+              <p>Once people believe something is legitimate &mdash; a credible email, a familiar face on a call &mdash; they unconsciously filter out signals that contradict it. Working Voices&apos; training teaches people to actively seek out evidence that the situation might be a scam.</p>
             </div>
           </div>
         </div>
@@ -426,7 +426,7 @@ export default async function Home() {
             <div className="stat-source">PhishLabs</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">5 min</div>
+            <div className="stat-number">5 mins</div>
             <div className="stat-label">For AI to create a phishing campaign vs 16 hours for a human</div>
             <div className="stat-source">IBM X-Force</div>
           </div>
@@ -453,6 +453,45 @@ export default async function Home() {
         <p style={{ marginTop: '24px', fontSize: '14px', opacity: 0.8 }}>
           {c.cta_email}
         </p>
+      </section>
+
+      {/* ABOUT WORKING VOICES */}
+      <section className="section about-wv-section" id="about">
+        <div className="section-header">
+          <span className="section-label">About Us</span>
+          <h2>About Working Voices</h2>
+          <p className="about-wv-intro">
+            Established in 1998, Working Voices is a global professional skills consultancy
+            specialising in Leadership, Communication and Critical Thinking skills.
+            We deliver training to over 100 of the world&rsquo;s largest companies including:
+          </p>
+        </div>
+        <div className="client-logos-grid">
+          <div className="client-logo-item">
+            <img src="/logos/nasa.svg" alt="NASA" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/microsoft.svg" alt="Microsoft" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/jpmorgan.svg" alt="J.P. Morgan" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/barclays.svg" alt="Barclays" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/sony.svg" alt="Sony" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/rolex.svg" alt="Rolex" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/blackrock.svg" alt="BlackRock" />
+          </div>
+          <div className="client-logo-item">
+            <img src="/logos/nomura.svg" alt="Nomura" />
+          </div>
+        </div>
       </section>
 
       {/* FOOTER */}

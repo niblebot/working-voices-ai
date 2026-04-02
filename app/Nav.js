@@ -23,7 +23,7 @@ export default function Nav() {
         <li><a href="#programme" onClick={() => setMenuOpen(false)}>Programme</a></li>
         <li><a href="#live-learning" onClick={() => setMenuOpen(false)}>Our Approach</a></li>
         <li><a href="#scenario" onClick={() => setMenuOpen(false)}>Real-World Attacks</a></li>
-        <li><a href="#contact" className="nav-cta" onClick={() => setMenuOpen(false)}>Book a Talk</a></li>
+        <li><a href="#contact" className="nav-cta" onClick={() => setMenuOpen(false)}>Get in Touch</a></li>
       </ul>
     </nav>
   );

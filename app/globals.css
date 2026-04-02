@@ -816,6 +816,49 @@ h1, h2, h3, h4 {
   line-height: 1.7;
 }
 
+/* ─── ABOUT WORKING VOICES ─── */
+.about-wv-section {
+  background: var(--white);
+}
+
+.about-wv-intro {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 17px;
+  color: var(--gray-dark);
+  line-height: 1.7;
+}
+
+.client-logos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  gap: 40px 48px;
+  max-width: 960px;
+  margin: 56px auto 0;
+}
+
+.client-logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  opacity: 0.75;
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.client-logo-item:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.client-logo-item img {
+  height: 52px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+}
+
 /* ─── FOOTER ─── */
 .footer {
   background: var(--navy);

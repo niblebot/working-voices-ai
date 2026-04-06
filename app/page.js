@@ -81,11 +81,11 @@ export default async function Home() {
                 <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
               </svg>
             </div>
-            <h3>Deepfake Video Calls</h3>
-            <p>Real-time face and voice manipulation lets attackers impersonate executives on live video conferences, authorising fraudulent transfers.</p>
+            <h3>{c.threat_card1_title}</h3>
+            <p>{c.threat_card1_body}</p>
             <div className="threat-card-stat">
-              <div className="stat-number">$25.6M</div>
-              <div className="stat-desc">Stolen from engineering firm Arup via a single deepfake video call impersonating the CFO. &mdash; CNN, 2024</div>
+              <div className="stat-number">{c.threat_card1_stat}</div>
+              <div className="stat-desc">{c.threat_card1_stat_desc}</div>
             </div>
           </div>
           <div className="threat-card">
@@ -97,11 +97,11 @@ export default async function Home() {
                 <line x1="8" y1="23" x2="16" y2="23"></line>
               </svg>
             </div>
-            <h3>AI Voice Cloning</h3>
-            <p>A few seconds of publicly available audio is enough to clone someone&apos;s voice with near-perfect accuracy, enabling convincing phone-based fraud.</p>
+            <h3>{c.threat_card2_title}</h3>
+            <p>{c.threat_card2_body}</p>
             <div className="threat-card-stat">
-              <div className="stat-number">1,600%</div>
-              <div className="stat-desc">Surge in deepfake-enabled voice phishing attacks in Q1 2025 vs Q4 2024. &mdash; Keepnet Labs</div>
+              <div className="stat-number">{c.threat_card2_stat}</div>
+              <div className="stat-desc">{c.threat_card2_stat_desc}</div>
             </div>
           </div>
           <div className="threat-card">
@@ -111,38 +111,38 @@ export default async function Home() {
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
-            <h3>AI-Generated Phishing</h3>
-            <p>Generative AI creates perfectly written, hyper-personalised phishing emails in seconds &mdash; with dramatically higher success rates than human-crafted attacks.</p>
+            <h3>{c.threat_card3_title}</h3>
+            <p>{c.threat_card3_body}</p>
             <div className="threat-card-stat">
-              <div className="stat-number">54%</div>
-              <div className="stat-desc">Click-through rate on AI-generated phishing emails, vs 12% for conventional phishing. &mdash; Brightside AI, 2024</div>
+              <div className="stat-number">{c.threat_card3_stat}</div>
+              <div className="stat-desc">{c.threat_card3_stat_desc}</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* STATS BANNER */}
+      {/* STATS BANNER 1 */}
       <div className="stats-banner">
         <div className="stats-banner-inner">
           <div className="stat-item">
-            <div className="stat-number">&pound;14.4B</div>
-            <div className="stat-label">Annual cost of fraud in England &amp; Wales</div>
-            <div className="stat-source">UK Home Office, 2024</div>
+            <div className="stat-number">{c.banner1_stat1_number}</div>
+            <div className="stat-label">{c.banner1_stat1_label}</div>
+            <div className="stat-source">{c.banner1_stat1_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">Every 5 mins</div>
-            <div className="stat-label">A deepfake attack is attempted globally</div>
-            <div className="stat-source">Entrust, 2024</div>
+            <div className="stat-number">{c.banner1_stat2_number}</div>
+            <div className="stat-label">{c.banner1_stat2_label}</div>
+            <div className="stat-source">{c.banner1_stat2_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">$40B</div>
-            <div className="stat-label">Predicted AI fraud losses by 2027</div>
-            <div className="stat-source">Deloitte</div>
+            <div className="stat-number">{c.banner1_stat3_number}</div>
+            <div className="stat-label">{c.banner1_stat3_label}</div>
+            <div className="stat-source">{c.banner1_stat3_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">80%</div>
-            <div className="stat-label">Of companies have no deepfake defence protocols</div>
-            <div className="stat-source">Keepnet Labs</div>
+            <div className="stat-number">{c.banner1_stat4_number}</div>
+            <div className="stat-label">{c.banner1_stat4_label}</div>
+            <div className="stat-source">{c.banner1_stat4_source}</div>
           </div>
         </div>
       </div>
@@ -161,10 +161,7 @@ export default async function Home() {
             <div className="stage-audience">{c.stage1_audience}</div>
             <p>{c.stage1_body}</p>
             <ul>
-              <li>Live deepfake demonstration</li>
-              <li>Real-world case studies of AI fraud</li>
-              <li>The psychology of why people fall for it</li>
-              <li>Designed to be talked about afterwards</li>
+              {(c.stage1_bullets || '').split('\n').filter(Boolean).map((b, i) => <li key={i}>{b}</li>)}
             </ul>
           </div>
           <div className="stage-card">
@@ -173,10 +170,7 @@ export default async function Home() {
             <div className="stage-audience">{c.stage2_audience}</div>
             <p>{c.stage2_body}</p>
             <ul>
-              <li>How urgency and authority bypass rational thinking</li>
-              <li>Recognising emotional manipulation tactics</li>
-              <li>Verification protocols that actually work</li>
-              <li>Building intellectual humility as a defence</li>
+              {(c.stage2_bullets || '').split('\n').filter(Boolean).map((b, i) => <li key={i}>{b}</li>)}
             </ul>
           </div>
           <div className="stage-card">
@@ -185,10 +179,7 @@ export default async function Home() {
             <div className="stage-audience">{c.stage3_audience}</div>
             <p>{c.stage3_body}</p>
             <ul>
-              <li>Custom deepfakes tailored to your organisation</li>
-              <li>Unannounced simulated attacks over time</li>
-              <li>Measurable results and vulnerability reports</li>
-              <li>Refresher training for those who need it</li>
+              {(c.stage3_bullets || '').split('\n').filter(Boolean).map((b, i) => <li key={i}>{b}</li>)}
             </ul>
           </div>
         </div>
@@ -209,8 +200,8 @@ export default async function Home() {
                 <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.16z"/>
               </svg>
             </div>
-            <h3>Behaviour Changes in the Room</h3>
-            <p>Psychological self-defence isn&apos;t a concept you learn &mdash; it&apos;s a reflex you build. Live facilitation creates the emotional context needed for real behavioural change. eLearning creates awareness. We create resilience.</p>
+            <h3>{c.live_card1_title}</h3>
+            <p>{c.live_card1_body}</p>
           </div>
           <div className="live-card">
             <div className="live-card-icon">
@@ -221,8 +212,8 @@ export default async function Home() {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <h3>Shared Experience Builds Culture</h3>
-            <p>When a team goes through a deepfake reveal together, it becomes a shared reference point &mdash; a moment they talk about. That cultural memory is what keeps people vigilant long after the training ends.</p>
+            <h3>{c.live_card2_title}</h3>
+            <p>{c.live_card2_body}</p>
           </div>
           <div className="live-card">
             <div className="live-card-icon">
@@ -230,8 +221,8 @@ export default async function Home() {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <h3>Emotional Impact Drives Retention</h3>
-            <p>We remember what shocks us. A live demonstration where your own colleague &mdash; or your own voice &mdash; appears as a deepfake creates the kind of visceral understanding that no video module ever could.</p>
+            <h3>{c.live_card3_title}</h3>
+            <p>{c.live_card3_body}</p>
           </div>
           <div className="live-card">
             <div className="live-card-icon">
@@ -241,8 +232,8 @@ export default async function Home() {
                 <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
               </svg>
             </div>
-            <h3>Tailored to Your Organisation</h3>
-            <p>A skilled facilitator reads the room, adapts to your industry&apos;s specific threat profile, and answers the questions your people are actually asking. No algorithm does that.</p>
+            <h3>{c.live_card4_title}</h3>
+            <p>{c.live_card4_body}</p>
           </div>
           <div className="live-card">
             <div className="live-card-icon">
@@ -252,8 +243,8 @@ export default async function Home() {
                 <circle cx="12" cy="12" r="2"/>
               </svg>
             </div>
-            <h3>Practice Under Pressure</h3>
-            <p>Role-play scenarios, live simulations, and group challenges let people practise the &ldquo;pause and verify&rdquo; habit in a safe environment &mdash; so it becomes instinctive when it matters most.</p>
+            <h3>{c.live_card5_title}</h3>
+            <p>{c.live_card5_body}</p>
           </div>
           <div className="live-card">
             <div className="live-card-icon">
@@ -262,8 +253,8 @@ export default async function Home() {
                 <polyline points="17 6 23 6 23 12"/>
               </svg>
             </div>
-            <h3>Measurable Results</h3>
-            <p>Our simulated deepfake testing phase provides hard data on vulnerability before and after training &mdash; giving your board concrete evidence that the investment is working.</p>
+            <h3>{c.live_card6_title}</h3>
+            <p>{c.live_card6_body}</p>
           </div>
         </div>
       </section>
@@ -276,29 +267,29 @@ export default async function Home() {
             <h2>{c.vuln_h2}</h2>
             <p>{c.vuln_intro}</p>
             <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.6)' }}>
-              Understanding your own psychological architecture is the first step to defending it.
+              {c.vuln_p2}
             </p>
           </div>
           <div className="vuln-biases">
             <div className="bias-card">
               <div className="bias-number">01</div>
-              <h4>Authority Bias</h4>
-              <p>When a request appears to come from the CEO, the brain downgrades scepticism. AI attackers exploit this weakness by creating flawless impersonations of senior leadership, deliberately triggering deference before rational thought can kick in.</p>
+              <h4>{c.bias1_title}</h4>
+              <p>{c.bias1_body}</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">02</div>
-              <h4>Urgency &amp; Scarcity</h4>
-              <p>Phrases like &ldquo;this must be done today&rdquo; or &ldquo;don&apos;t discuss this with anyone yet&rdquo; create acquiescence. Urgency narrows attention, suppresses doubt, and dramatically increases compliance.</p>
+              <h4>{c.bias2_title}</h4>
+              <p>{c.bias2_body}</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">03</div>
-              <h4>Familiarity &amp; Trust</h4>
-              <p>Attackers study their targets for weeks before striking &mdash; referencing real projects, known colleagues, and recent events. Familiarity creates comfort. Comfort overrides verification. That&apos;s the attack vector.</p>
+              <h4>{c.bias3_title}</h4>
+              <p>{c.bias3_body}</p>
             </div>
             <div className="bias-card">
               <div className="bias-number">04</div>
-              <h4>Confirmation Bias</h4>
-              <p>Once people believe something is legitimate &mdash; a credible email, a familiar face on a call &mdash; they unconsciously filter out signals that contradict it. Working Voices&apos; training teaches people to actively seek out evidence that the situation might be a scam.</p>
+              <h4>{c.bias4_title}</h4>
+              <p>{c.bias4_body}</p>
             </div>
           </div>
         </div>
@@ -311,9 +302,7 @@ export default async function Home() {
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
             </div>
-            <p>
-              <strong>The goal isn&apos;t to make your people paranoid.</strong> It&apos;s to give them the intellectual humility to pause, the emotional presence to notice when something feels off, and the confidence to verify &mdash; even when under pressure from apparent authority.
-            </p>
+            <p>{c.vuln_callout}</p>
           </div>
         </div>
       </section>
@@ -328,8 +317,7 @@ export default async function Home() {
             <p>{c.why_p2}</p>
             <p>{c.why_p3}</p>
             <p style={{ marginTop: '24px' }}>
-              <strong>People who can identify deepfake videos are barely better than a coin flip</strong> &mdash;
-              just 24.5% accuracy. The answer isn&apos;t better eyes. It&apos;s better thinking.
+              <strong>{c.why_stat_note}</strong>
             </p>
           </div>
           <div className="why-visual">
@@ -352,24 +340,24 @@ export default async function Home() {
           </div>
           <div className="scenario-timeline">
             <div className="scenario-step">
-              <div className="step-tag">Week 1&ndash;2: Reconnaissance</div>
-              <h4>The attackers gather intelligence</h4>
-              <p>Publicly available LinkedIn profiles, conference videos, podcast appearances, and company announcements are scraped to build detailed profiles of key executives. This is spear-phishing at its most targeted.</p>
+              <div className="step-tag">{c.scenario_step1_tag}</div>
+              <h4>{c.scenario_step1_title}</h4>
+              <p>{c.scenario_step1_body}</p>
             </div>
             <div className="scenario-step">
-              <div className="step-tag">Week 3: Building trust</div>
-              <h4>Legitimate-looking emails arrive</h4>
-              <p>The target receives credible emails that appear to come from senior leadership, establishing context for an upcoming &ldquo;confidential&rdquo; financial discussion. Nothing seems unusual.</p>
+              <div className="step-tag">{c.scenario_step2_tag}</div>
+              <h4>{c.scenario_step2_title}</h4>
+              <p>{c.scenario_step2_body}</p>
             </div>
             <div className="scenario-step">
-              <div className="step-tag">The attack: Live deepfake call</div>
-              <h4>A video conference with AI-generated colleagues</h4>
-              <p>The employee joins a video call where the CFO and multiple colleagues appear to be present. Real-time face and voice manipulation makes the impersonation convincing. A &pound;20 million transfer is authorised.</p>
+              <div className="step-tag">{c.scenario_step3_tag}</div>
+              <h4>{c.scenario_step3_title}</h4>
+              <p>{c.scenario_step3_body}</p>
             </div>
             <div className="scenario-step">
-              <div className="step-tag">Aftermath</div>
-              <h4>$25.6 million lost before detection</h4>
-              <p>Multiple transfers were made across 15 transactions before the fraud was discovered. The employee had followed what appeared to be legitimate instructions from trusted superiors.</p>
+              <div className="step-tag">{c.scenario_step4_tag}</div>
+              <h4>{c.scenario_step4_title}</h4>
+              <p>{c.scenario_step4_body}</p>
             </div>
           </div>
         </div>
@@ -378,9 +366,9 @@ export default async function Home() {
       {/* WHO THIS IS FOR */}
       <section className="section section-dark">
         <div className="section-header">
-          <span className="section-label">Who This Is For</span>
-          <h2>Built for Organisations Under Threat</h2>
-          <p>Particularly relevant for defence, finance, professional services, and any organisation where a single fraudulent authorisation could cause catastrophic loss.</p>
+          <span className="section-label">{c.for_label}</span>
+          <h2>{c.for_h2}</h2>
+          <p>{c.for_intro}</p>
         </div>
         <div className="proof-grid">
           <div className="proof-card">
@@ -389,8 +377,8 @@ export default async function Home() {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
             </div>
-            <h3>Defence &amp; Government</h3>
-            <p>Where information security is paramount and state-sponsored actors use increasingly sophisticated AI tools for social engineering.</p>
+            <h3>{c.for_card1_title}</h3>
+            <p>{c.for_card1_body}</p>
           </div>
           <div className="proof-card">
             <div className="proof-icon">
@@ -399,8 +387,8 @@ export default async function Home() {
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
               </svg>
             </div>
-            <h3>Financial Services</h3>
-            <p>$2.77 billion in Business Email Compromise losses reported to the FBI in 2024 alone. Finance teams are the primary target for AI-enabled fraud.</p>
+            <h3>{c.for_card2_title}</h3>
+            <p>{c.for_card2_body}</p>
           </div>
           <div className="proof-card">
             <div className="proof-icon">
@@ -411,34 +399,34 @@ export default async function Home() {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
             </div>
-            <h3>Enterprise &amp; Professional Services</h3>
-            <p>Any organisation where executives are public-facing, decisions move fast, and a single compromised employee can authorise significant transactions.</p>
+            <h3>{c.for_card3_title}</h3>
+            <p>{c.for_card3_body}</p>
           </div>
         </div>
       </section>
 
-      {/* ADDITIONAL STATS ROW */}
+      {/* STATS BANNER 2 */}
       <div className="stats-banner">
         <div className="stats-banner-inner">
           <div className="stat-item">
-            <div className="stat-number">85%</div>
-            <div className="stat-label">Of organisations experienced a social engineering attack in 2024</div>
-            <div className="stat-source">PhishLabs</div>
+            <div className="stat-number">{c.banner2_stat1_number}</div>
+            <div className="stat-label">{c.banner2_stat1_label}</div>
+            <div className="stat-source">{c.banner2_stat1_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">5 mins</div>
-            <div className="stat-label">For AI to create a phishing campaign vs 16 hours for a human</div>
-            <div className="stat-source">IBM X-Force</div>
+            <div className="stat-number">{c.banner2_stat2_number}</div>
+            <div className="stat-label">{c.banner2_stat2_label}</div>
+            <div className="stat-source">{c.banner2_stat2_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">49%</div>
-            <div className="stat-label">Of businesses globally have experienced a deepfake incident</div>
-            <div className="stat-source">Keepnet Labs</div>
+            <div className="stat-number">{c.banner2_stat3_number}</div>
+            <div className="stat-label">{c.banner2_stat3_label}</div>
+            <div className="stat-source">{c.banner2_stat3_source}</div>
           </div>
           <div className="stat-item">
-            <div className="stat-number">&pound;5.2B</div>
-            <div className="stat-label">Annual cost of fraud against UK businesses</div>
-            <div className="stat-source">UK Home Office</div>
+            <div className="stat-number">{c.banner2_stat4_number}</div>
+            <div className="stat-label">{c.banner2_stat4_label}</div>
+            <div className="stat-source">{c.banner2_stat4_source}</div>
           </div>
         </div>
       </div>
@@ -458,13 +446,9 @@ export default async function Home() {
       {/* ABOUT WORKING VOICES */}
       <section className="section about-wv-section" id="about">
         <div className="section-header">
-          <span className="section-label">About Us</span>
-          <h2>About Working Voices</h2>
-          <p className="about-wv-intro">
-            Established in 1998, Working Voices is a global professional skills consultancy
-            specialising in Leadership, Communication and Critical Thinking skills.
-            We deliver training to over 100 of the world&rsquo;s largest companies including:
-          </p>
+          <span className="section-label">{c.about_label}</span>
+          <h2>{c.about_h2}</h2>
+          <p className="about-wv-intro">{c.about_intro}</p>
         </div>
         <div className="client-logos-grid">
           <div className="client-logo-item">

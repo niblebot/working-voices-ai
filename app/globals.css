@@ -476,7 +476,7 @@ h1, h2, h3, h4 {
 
 /* ─── STATS BANNER ─── */
 .stats-banner {
-  background: var(--navy);
+  background: var(--blue);
   padding: 72px 48px;
 }
 
@@ -495,20 +495,20 @@ h1, h2, h3, h4 {
 .stat-item .stat-number {
   font-family: 'DM Serif Display', serif;
   font-size: clamp(36px, 4vw, 52px);
-  color: var(--blue);
+  color: var(--white);
   margin-bottom: 8px;
   white-space: nowrap;
 }
 
 .stat-item .stat-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
 }
 
 .stat-item .stat-source {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   margin-top: 8px;
 }
 

@@ -1,30 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { put, list } from '@vercel/blob';
+import { put } from '@vercel/blob';
 import { defaultContent } from '@/lib/content';
-
-const BLOB_FILENAME = 'site_content.json';
-
-let cachedBlobUrl = null;
-
-async function getBlobUrl() {
-  if (cachedBlobUrl) return cachedBlobUrl;
-  const { blobs } = await list({ prefix: BLOB_FILENAME });
-  if (blobs.length) cachedBlobUrl = blobs[0].url;
-  return cachedBlobUrl;
-}
-
-async function readContent() {
-  try {
-    const url = await getBlobUrl();
-    if (!url) return defaultContent;
-    const res = await fetch(url, { cache: 'no-store' });
-    const stored = await res.json();
-    return { ...defaultContent, ...stored };
-  } catch {
-    return defaultContent;
-  }
-}
+import { readContent, setBlobUrl } from '@/lib/getContent';
 
 function isAuthed(cookieStore) {
   return cookieStore.get('admin_auth')?.value === process.env.ADMIN_PASSWORD;
@@ -50,12 +28,12 @@ export async function POST(request) {
   try {
     const current = await readContent();
     const merged = { ...current, ...safe };
-    const blob = await put(BLOB_FILENAME, JSON.stringify(merged), {
+    const blob = await put('site_content.json', JSON.stringify(merged), {
       access: 'public',
       allowOverwrite: true,
       contentType: 'application/json',
     });
-    cachedBlobUrl = blob.url;
+    setBlobUrl(blob.url);
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

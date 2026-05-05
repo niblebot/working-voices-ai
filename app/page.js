@@ -1,23 +1,10 @@
 export const dynamic = 'force-dynamic';
 
 import Nav from './Nav';
-import { defaultContent } from '@/lib/content';
-
-async function getContent() {
-  try {
-    const { list } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: 'site_content.json' });
-    if (!blobs.length) return defaultContent;
-    const res = await fetch(blobs[0].url, { cache: 'no-store' });
-    const stored = await res.json();
-    return { ...defaultContent, ...stored };
-  } catch {
-    return defaultContent;
-  }
-}
+import { readContent } from '@/lib/getContent';
 
 export default async function Home() {
-  const c = await getContent();
+  const c = await readContent();
 
   return (
     <>
@@ -147,6 +134,54 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* UNDERSTANDING YOUR VULNERABILITY */}
+      <section className="section section-dark" id="vulnerability">
+        <div className="vuln-layout">
+          <div className="vuln-intro">
+            <span className="section-label">{c.vuln_label}</span>
+            <h2>{c.vuln_h2}</h2>
+            <p>{c.vuln_intro}</p>
+            <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.6)' }}>
+              {c.vuln_p2}
+            </p>
+          </div>
+          <div className="vuln-biases">
+            <div className="bias-card">
+              <div className="bias-number">01</div>
+              <h4>{c.bias1_title}</h4>
+              <p>{c.bias1_body}</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">02</div>
+              <h4>{c.bias2_title}</h4>
+              <p>{c.bias2_body}</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">03</div>
+              <h4>{c.bias3_title}</h4>
+              <p>{c.bias3_body}</p>
+            </div>
+            <div className="bias-card">
+              <div className="bias-number">04</div>
+              <h4>{c.bias4_title}</h4>
+              <p>{c.bias4_body}</p>
+            </div>
+          </div>
+        </div>
+        <div className="vuln-callout">
+          <div className="vuln-callout-inner">
+            <div className="vuln-callout-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFDA8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <p>{c.vuln_callout}</p>
+          </div>
+        </div>
+      </section>
+
       {/* THREE-STAGE PROGRAMME */}
       <section className="section" id="programme">
         <div className="section-header">
@@ -255,54 +290,6 @@ export default async function Home() {
             </div>
             <h3>{c.live_card6_title}</h3>
             <p>{c.live_card6_body}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* UNDERSTANDING YOUR VULNERABILITY */}
-      <section className="section section-dark" id="vulnerability">
-        <div className="vuln-layout">
-          <div className="vuln-intro">
-            <span className="section-label">{c.vuln_label}</span>
-            <h2>{c.vuln_h2}</h2>
-            <p>{c.vuln_intro}</p>
-            <p style={{ marginTop: '16px', color: 'rgba(255,255,255,0.6)' }}>
-              {c.vuln_p2}
-            </p>
-          </div>
-          <div className="vuln-biases">
-            <div className="bias-card">
-              <div className="bias-number">01</div>
-              <h4>{c.bias1_title}</h4>
-              <p>{c.bias1_body}</p>
-            </div>
-            <div className="bias-card">
-              <div className="bias-number">02</div>
-              <h4>{c.bias2_title}</h4>
-              <p>{c.bias2_body}</p>
-            </div>
-            <div className="bias-card">
-              <div className="bias-number">03</div>
-              <h4>{c.bias3_title}</h4>
-              <p>{c.bias3_body}</p>
-            </div>
-            <div className="bias-card">
-              <div className="bias-number">04</div>
-              <h4>{c.bias4_title}</h4>
-              <p>{c.bias4_body}</p>
-            </div>
-          </div>
-        </div>
-        <div className="vuln-callout">
-          <div className="vuln-callout-inner">
-            <div className="vuln-callout-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFDA8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <p>{c.vuln_callout}</p>
           </div>
         </div>
       </section>

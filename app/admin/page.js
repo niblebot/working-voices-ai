@@ -426,10 +426,11 @@ function AnalyticsTab({ loading, error, data }) {
 
   if (!data) return null;
 
-  const { timeseries = [], pages = [] } = data;
-  const totalViews = timeseries.reduce((sum, d) => sum + (d.total ?? 0), 0);
-  const totalVisitors = timeseries.reduce((sum, d) => sum + (d.devices ?? 0), 0);
-  const maxViews = Math.max(...timeseries.map(d => d.total ?? 0), 1);
+  const ts = Array.isArray(data.timeseries) ? data.timeseries : [];
+  const pg = Array.isArray(data.pages) ? data.pages : [];
+  const totalViews = ts.reduce((sum, d) => sum + (d.total ?? 0), 0);
+  const totalVisitors = ts.reduce((sum, d) => sum + (d.devices ?? 0), 0);
+  const maxViews = ts.length > 0 ? Math.max(...ts.map(d => d.total ?? 0), 1) : 1;
 
   function fmtDate(iso) {
     const d = new Date(iso);
@@ -451,17 +452,17 @@ function AnalyticsTab({ loading, error, data }) {
       </div>
 
       {/* Bar chart */}
-      {timeseries.length > 0 && (
+      {ts.length > 0 && (
         <div style={styles.sectionBlock}>
           <h2 style={styles.sectionTitle}>Daily page views</h2>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 140, paddingBottom: 28, position: 'relative' }}>
-            {timeseries.map((d, i) => {
+            {ts.map((d, i) => {
               const pct = ((d.total ?? 0) / maxViews) * 100;
               return (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }} title={`${fmtDate(d.key)}: ${(d.total ?? 0).toLocaleString()} views`}>
                   <div style={{ width: '100%', height: `${Math.max(pct, 2)}%`, background: '#1677F8', borderRadius: '3px 3px 0 0', transition: 'height 0.3s' }} />
                   {i % 5 === 0 && (
-                    <div style={{ position: 'absolute', bottom: 0, fontSize: 10, color: '#999', whiteSpace: 'nowrap', transform: 'translateX(-50%)', left: `${(i / timeseries.length) * 100}%` }}>
+                    <div style={{ position: 'absolute', bottom: 0, fontSize: 10, color: '#999', whiteSpace: 'nowrap', transform: 'translateX(-50%)', left: `${(i / ts.length) * 100}%` }}>
                       {fmtDate(d.key)}
                     </div>
                   )}
@@ -473,7 +474,7 @@ function AnalyticsTab({ loading, error, data }) {
       )}
 
       {/* Top pages */}
-      {pages.length > 0 && (
+      {pg.length > 0 && (
         <div style={styles.sectionBlock}>
           <h2 style={styles.sectionTitle}>Top pages</h2>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
@@ -484,7 +485,7 @@ function AnalyticsTab({ loading, error, data }) {
               </tr>
             </thead>
             <tbody>
-              {pages.map((p, i) => (
+              {pg.map((p, i) => (
                 <tr key={i}>
                   <td style={{ padding: '10px 0', color: '#03101B', borderBottom: '1px solid #f0f2f5', fontFamily: 'monospace', fontSize: 13 }}>{p.key}</td>
                   <td style={{ padding: '10px 0', color: '#03101B', borderBottom: '1px solid #f0f2f5', textAlign: 'right', fontWeight: 600 }}>{(p.total ?? 0).toLocaleString()}</td>
@@ -495,7 +496,15 @@ function AnalyticsTab({ loading, error, data }) {
         </div>
       )}
 
-      {timeseries.length === 0 && pages.length === 0 && (
+      {/* Debug: show raw API response if no data */}
+      {ts.length === 0 && pg.length === 0 && data.raw && (
+        <details style={{ marginBottom: 24 }}>
+          <summary style={{ cursor: 'pointer', color: '#999', fontSize: 13, marginBottom: 8 }}>Raw API response (debug)</summary>
+          <pre style={{ background: '#f5f7fa', padding: 16, borderRadius: 8, fontSize: 12, overflow: 'auto', maxHeight: 300 }}>{JSON.stringify(data.raw, null, 2)}</pre>
+        </details>
+      )}
+
+      {ts.length === 0 && pg.length === 0 && !data.raw && (
         <div style={{ textAlign: 'center', color: '#999', padding: '60px 0' }}>No analytics data yet.</div>
       )}
     </div>

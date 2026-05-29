@@ -46,10 +46,10 @@ export async function GET() {
       return NextResponse.json({ error: tsJson.error?.message ?? 'Vercel API error' }, { status: 502 });
     }
 
-    return NextResponse.json({
-      timeseries: tsJson.data ?? [],
-      pages: pvJson.data ?? [],
-    });
+    const timeseries = Array.isArray(tsJson.data) ? tsJson.data : [];
+    const pages = Array.isArray(pvJson.data) ? pvJson.data : [];
+
+    return NextResponse.json({ timeseries, pages, raw: { ts: tsJson, pv: pvJson } });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

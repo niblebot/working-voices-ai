@@ -207,6 +207,10 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState('content');
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState(null);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -221,6 +225,32 @@ export default function AdminPage() {
       loadContent();
     } else {
       setLoginError('Incorrect password');
+    }
+  }
+
+  async function loadAnalytics() {
+    setAnalyticsLoading(true);
+    setAnalyticsError(null);
+    try {
+      const res = await fetch('/api/analytics');
+      const data = await res.json();
+      if (!res.ok) {
+        setAnalyticsError(data.error === 'no_token'
+          ? 'Analytics token not configured. Add VERCEL_TOKEN to your environment variables.'
+          : (data.error ?? 'Failed to load analytics'));
+      } else {
+        setAnalytics(data);
+      }
+    } catch {
+      setAnalyticsError('Failed to load analytics');
+    }
+    setAnalyticsLoading(false);
+  }
+
+  function handleTabChange(newTab) {
+    setTab(newTab);
+    if (newTab === 'analytics' && !analytics && !analyticsLoading) {
+      loadAnalytics();
     }
   }
 
@@ -288,54 +318,186 @@ export default function AdminPage() {
   return (
     <div style={styles.adminWrap}>
       <div style={styles.adminHeader}>
-        <img
-          src="https://www.workingvoices.com/app/uploads/2024/09/footer-logo.png"
-          alt="Working Voices"
-          style={{ height: 24 }}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <img
+            src="https://www.workingvoices.com/app/uploads/2024/09/footer-logo.png"
+            alt="Working Voices"
+            style={{ height: 24 }}
+          />
+          <div style={styles.tabBar}>
+            <button
+              onClick={() => handleTabChange('content')}
+              style={tab === 'content' ? styles.tabActive : styles.tabInactive}
+            >
+              Content
+            </button>
+            <button
+              onClick={() => handleTabChange('analytics')}
+              style={tab === 'analytics' ? styles.tabActive : styles.tabInactive}
+            >
+              Analytics
+            </button>
+          </div>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {saved && <span style={styles.savedBadge}>Saved!</span>}
+          {tab === 'content' && saved && <span style={styles.savedBadge}>Saved!</span>}
           <a href="/" target="_blank" style={styles.previewLink}>View site ↗</a>
-          <button onClick={handleSave} disabled={saving} style={styles.btnPrimary}>
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
+          {tab === 'content' && (
+            <button onClick={handleSave} disabled={saving} style={styles.btnPrimary}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          )}
+          {tab === 'analytics' && (
+            <button onClick={loadAnalytics} disabled={analyticsLoading} style={styles.btnPrimary}>
+              {analyticsLoading ? 'Refreshing…' : 'Refresh'}
+            </button>
+          )}
         </div>
       </div>
 
-      <div style={styles.adminBody}>
-        {sections.map(({ section, keys }) => (
-          <div key={section} style={styles.sectionBlock}>
-            <h2 style={styles.sectionTitle}>{section}</h2>
-            {keys.map(key => (
-              <div key={key} style={styles.fieldWrap}>
-                <label style={styles.label}>{FIELD_LABELS[key]}</label>
-                {TEXTAREA_KEYS.has(key) ? (
-                  <textarea
-                    value={content[key] || ''}
-                    onChange={e => handleChange(key, e.target.value)}
-                    style={styles.textarea}
-                    rows={4}
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    value={content[key] || ''}
-                    onChange={e => handleChange(key, e.target.value)}
-                    style={styles.input}
-                  />
-                )}
+      {tab === 'content' && (
+        <>
+          <div style={styles.adminBody}>
+            {sections.map(({ section, keys }) => (
+              <div key={section} style={styles.sectionBlock}>
+                <h2 style={styles.sectionTitle}>{section}</h2>
+                {keys.map(key => (
+                  <div key={key} style={styles.fieldWrap}>
+                    <label style={styles.label}>{FIELD_LABELS[key]}</label>
+                    {TEXTAREA_KEYS.has(key) ? (
+                      <textarea
+                        value={content[key] || ''}
+                        onChange={e => handleChange(key, e.target.value)}
+                        style={styles.textarea}
+                        rows={4}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={content[key] || ''}
+                        onChange={e => handleChange(key, e.target.value)}
+                        style={styles.input}
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
-        ))}
+          <div style={styles.adminFooter}>
+            {saved && <span style={styles.savedBadge}>Saved!</span>}
+            <button onClick={handleSave} disabled={saving} style={styles.btnPrimary}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          </div>
+        </>
+      )}
+
+      {tab === 'analytics' && (
+        <AnalyticsTab
+          loading={analyticsLoading}
+          error={analyticsError}
+          data={analytics}
+        />
+      )}
+    </div>
+  );
+}
+
+function AnalyticsTab({ loading, error, data }) {
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300, color: '#666', fontFamily: 'system-ui, sans-serif' }}>
+        Loading analytics…
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ maxWidth: 600, margin: '60px auto', padding: '0 24px', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 10, padding: '24px 28px', color: '#856404' }}>
+          <strong style={{ display: 'block', marginBottom: 8 }}>Analytics unavailable</strong>
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { timeseries = [], pages = [] } = data;
+  const totalViews = timeseries.reduce((sum, d) => sum + (d.total ?? 0), 0);
+  const totalVisitors = timeseries.reduce((sum, d) => sum + (d.devices ?? 0), 0);
+  const maxViews = Math.max(...timeseries.map(d => d.total ?? 0), 1);
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 24px 80px', fontFamily: 'system-ui, sans-serif' }}>
+      {/* Summary cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 28 }}>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{totalViews.toLocaleString()}</div>
+          <div style={styles.statLabel}>Page views — last 30 days</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{totalVisitors.toLocaleString()}</div>
+          <div style={styles.statLabel}>Unique visitors — last 30 days</div>
+        </div>
       </div>
 
-      <div style={styles.adminFooter}>
-        {saved && <span style={styles.savedBadge}>Saved!</span>}
-        <button onClick={handleSave} disabled={saving} style={styles.btnPrimary}>
-          {saving ? 'Saving…' : 'Save changes'}
-        </button>
-      </div>
+      {/* Bar chart */}
+      {timeseries.length > 0 && (
+        <div style={styles.sectionBlock}>
+          <h2 style={styles.sectionTitle}>Daily page views</h2>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 140, paddingBottom: 28, position: 'relative' }}>
+            {timeseries.map((d, i) => {
+              const pct = ((d.total ?? 0) / maxViews) * 100;
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }} title={`${fmtDate(d.key)}: ${(d.total ?? 0).toLocaleString()} views`}>
+                  <div style={{ width: '100%', height: `${Math.max(pct, 2)}%`, background: '#1677F8', borderRadius: '3px 3px 0 0', transition: 'height 0.3s' }} />
+                  {i % 5 === 0 && (
+                    <div style={{ position: 'absolute', bottom: 0, fontSize: 10, color: '#999', whiteSpace: 'nowrap', transform: 'translateX(-50%)', left: `${(i / timeseries.length) * 100}%` }}>
+                      {fmtDate(d.key)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Top pages */}
+      {pages.length > 0 && (
+        <div style={styles.sectionBlock}>
+          <h2 style={styles.sectionTitle}>Top pages</h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '8px 0', color: '#505050', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e8ecf1' }}>Page</th>
+                <th style={{ textAlign: 'right', padding: '8px 0', color: '#505050', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid #e8ecf1' }}>Views</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pages.map((p, i) => (
+                <tr key={i}>
+                  <td style={{ padding: '10px 0', color: '#03101B', borderBottom: '1px solid #f0f2f5', fontFamily: 'monospace', fontSize: 13 }}>{p.key}</td>
+                  <td style={{ padding: '10px 0', color: '#03101B', borderBottom: '1px solid #f0f2f5', textAlign: 'right', fontWeight: 600 }}>{(p.total ?? 0).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {timeseries.length === 0 && pages.length === 0 && (
+        <div style={{ textAlign: 'center', color: '#999', padding: '60px 0' }}>No analytics data yet.</div>
+      )}
     </div>
   );
 }
@@ -520,5 +682,46 @@ const styles = {
     color: 'rgba(255,255,255,0.6)',
     fontSize: 13,
     textDecoration: 'none',
+  },
+  tabBar: {
+    display: 'flex',
+    gap: 4,
+  },
+  tabActive: {
+    background: '#1677F8',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 6,
+    padding: '6px 16px',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  tabInactive: {
+    background: 'rgba(255,255,255,0.1)',
+    color: 'rgba(255,255,255,0.7)',
+    border: 'none',
+    borderRadius: 6,
+    padding: '6px 16px',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'pointer',
+  },
+  statCard: {
+    background: '#fff',
+    borderRadius: 12,
+    padding: '24px 28px',
+    border: '1px solid #e8ecf1',
+  },
+  statValue: {
+    fontSize: 36,
+    fontWeight: 700,
+    color: '#03101B',
+    lineHeight: 1,
+    marginBottom: 8,
+  },
+  statLabel: {
+    fontSize: 13,
+    color: '#666',
   },
 };

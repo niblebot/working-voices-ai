@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { verifySessionToken } from '@/lib/auth';
 
 const PROJECT_ID = 'prj_tF7flqv1kYBVXUHeYWQR5qM9a2pg';
 const TEAM_ID = 'team_1aVKo0jXtFmu45LUAH5nJKJG';
 
-function isAuthed(cookieStore) {
-  return cookieStore.get('admin_auth')?.value === process.env.ADMIN_PASSWORD;
-}
-
 export async function GET() {
   const cookieStore = await cookies();
-  if (!isAuthed(cookieStore)) {
+  if (!verifySessionToken(cookieStore.get('admin_auth')?.value)) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
   }
 

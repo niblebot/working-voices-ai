@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { verifySessionToken } from '@/lib/auth';
 import { put } from '@vercel/blob';
 import { defaultContent } from '@/lib/content';
 import { readContent, setBlobUrl } from '@/lib/getContent';
-
-function isAuthed(cookieStore) {
-  return cookieStore.get('admin_auth')?.value === process.env.ADMIN_PASSWORD;
-}
 
 export async function GET() {
   const content = await readContent();
@@ -15,7 +12,7 @@ export async function GET() {
 
 export async function POST(request) {
   const cookieStore = await cookies();
-  if (!isAuthed(cookieStore)) {
+  if (!verifySessionToken(cookieStore.get('admin_auth')?.value)) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const FIELD_LABELS = {
   // Hero
@@ -223,6 +223,8 @@ export default function AdminPage() {
     if (res.ok) {
       setAuthed(true);
       loadContent();
+    } else if (res.status === 429) {
+      setLoginError('Too many failed attempts — try again in 15 minutes');
     } else {
       setLoginError('Incorrect password');
     }

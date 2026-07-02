@@ -1,0 +1,227 @@
+/* Tighter section rhythm for this page only — homepage keeps its own spacing */
+.ty-page .section {
+  padding: 56px 48px;
+}
+
+.ty-page .section-header {
+  margin-bottom: 36px;
+}
+
+.ty-page .cta-section {
+  padding: 56px 48px;
+}
+
+.ty-page .ty-header {
+  padding-top: 128px;
+}
+
+.ty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.ty-card {
+  background: var(--white);
+  border: 2px solid #e8ecf1;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.section-gray .ty-card {
+  background: var(--white);
+}
+
+.ty-card-picked {
+  border-color: var(--blue);
+  box-shadow: 0 8px 24px rgba(22, 119, 248, 0.12);
+}
+
+.ty-card-real {
+  border-color: #22c55e;
+}
+
+.ty-card-fake {
+  border-color: var(--red-alert);
+}
+
+.ty-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-medium);
+}
+
+.ty-media {
+  width: 100%;
+  border-radius: 10px;
+  background: var(--navy);
+  aspect-ratio: 16 / 9;
+}
+
+.ty-media-audio {
+  width: 100%;
+}
+
+.ty-badge {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.ty-badge-real {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16803c;
+}
+
+.ty-badge-fake {
+  background: rgba(231, 76, 60, 0.12);
+  color: var(--red-alert);
+}
+
+.ty-pick-btn {
+  background: var(--gray-light);
+  color: var(--navy);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ty-pick-btn:hover:not(:disabled) {
+  background: #e8ecf1;
+}
+
+.ty-pick-btn-active {
+  background: var(--blue);
+  color: var(--white);
+}
+
+.ty-pick-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.ty-placeholder,
+.ty-video-placeholder {
+  max-width: 900px;
+  margin: 0 auto;
+  border: 2px dashed #cfd6e0;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--gray-medium);
+  font-size: 15px;
+}
+
+.ty-reveal-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 48px 56px;
+}
+
+.ty-result-banner {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--navy);
+  text-align: center;
+}
+
+.ty-stats-section .section-header {
+  margin-bottom: 40px;
+}
+
+.ty-muted {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ty-stat-callout {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.ty-stat-number {
+  font-family: 'DM Serif Display', serif;
+  font-size: 56px;
+  color: var(--blue);
+}
+
+.ty-stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+}
+
+.ty-calculator {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ty-calculator label {
+  display: block;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 12px;
+}
+
+.ty-calculator-result {
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--white);
+}
+
+.ty-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid #dde1e8;
+  font-size: 15px;
+  font-family: 'Red Hat Display', sans-serif;
+  box-sizing: border-box;
+}
+
+.ty-lead-form {
+  display: flex;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ty-lead-form .ty-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.ty-lead-done {
+  color: var(--white);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.ty-lead-error {
+  color: var(--white);
+  margin-top: 16px;
+  font-size: 14px;
+}

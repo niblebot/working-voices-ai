@@ -299,29 +299,39 @@ export default function QuizClient() {
       </section>
 
       {/* LEAD CAPTURE */}
-      <section className="cta-section">
-        <h2>Want to see this used against your organisation?</h2>
-        <p>Book a 15-minute live demo and we'll walk through what this looks like at scale.</p>
-        {leadStatus === 'done' ? (
-          <p className="ty-lead-done">Thanks — we'll be in touch to set up your demo.</p>
-        ) : (
-          <form onSubmit={handleLeadSubmit} className="ty-lead-form">
-            <input
-              type="email"
-              required
-              value={leadEmail}
-              onChange={(e) => setLeadEmail(e.target.value)}
-              placeholder="you@company.com"
-              className="ty-input"
-            />
-            <button type="submit" className="btn-white" disabled={leadStatus === 'submitting'}>
-              {leadStatus === 'submitting' ? 'Sending…' : 'Book a demo'}
-            </button>
-          </form>
-        )}
-        {leadStatus === 'error' && (
-          <p className="ty-lead-error">Something went wrong — please try again.</p>
-        )}
+      <section className="cta-section ty-broadcast">
+        <div className="ty-broadcast-frame">
+          <span className="ty-corner ty-corner-tl" />
+          <span className="ty-corner ty-corner-tr" />
+          <span className="ty-corner ty-corner-bl" />
+          <span className="ty-corner ty-corner-br" />
+          <div className="ty-broadcast-badge">
+            <span className="ty-broadcast-dot" />
+            Security Broadcast
+          </div>
+          <h2>Do you want to know more?</h2>
+          <p>Book a 15-minute live demo and we'll walk through what this looks like at scale.</p>
+          {leadStatus === 'done' ? (
+            <p className="ty-lead-done">Thanks — we'll be in touch to set up your demo.</p>
+          ) : (
+            <form onSubmit={handleLeadSubmit} className="ty-lead-form">
+              <input
+                type="email"
+                required
+                value={leadEmail}
+                onChange={(e) => setLeadEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="ty-input"
+              />
+              <button type="submit" className="btn-white" disabled={leadStatus === 'submitting'}>
+                {leadStatus === 'submitting' ? 'Sending…' : 'Book a demo'}
+              </button>
+            </form>
+          )}
+          {leadStatus === 'error' && (
+            <p className="ty-lead-error">Something went wrong — please try again.</p>
+          )}
+        </div>
       </section>
     </div>
   );

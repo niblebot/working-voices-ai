@@ -1,84 +1,124 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const VIDEO_REAL = '/testyourself/Real-nick1.mp4';
-const VIDEO_FAKE = '/testyourself/AI-nick1.mp4';
-const AUDIO_REAL = '/testyourself/real-audio.mp3';
-const AUDIO_FAKE = '/testyourself/fake-audio.mp3';
+// Pool of real/fake pairs. Add more entries here as new clips land —
+// rounds are drawn straight from these arrays, no other code changes needed.
+const VIDEO_POOL = [
+  { id: 'nick-1', real: '/testyourself/Real-nick1.mp4', fake: '/testyourself/AI-nick1.mp4' },
+];
 
-function randomOrder() {
+const AUDIO_POOL = [];
+
+function shuffledOrder() {
   return Math.random() < 0.5 ? ['real', 'fake'] : ['fake', 'real'];
 }
 
-function ClipCard({ kind, src, type, label, isPicked, isRevealed, onPick }) {
-  const isRealCard = kind === 'real';
+function LockedPairPlayer({ round, type, pick, isRevealed, onPick }) {
+  const [order] = useState(shuffledOrder);
+  const [stage, setStage] = useState('idle'); // 'idle' | 0 | 1 | 'done'
+  const mediaRef = useRef(null);
+
+  useEffect(() => {
+    const el = mediaRef.current;
+    if (!el || (stage !== 0 && stage !== 1)) return;
+    el.src = order[stage] === 'real' ? round.real : round.fake;
+    el.load();
+    el.play().catch(() => {});
+  }, [stage, order, round]);
+
+  function handleEnded() {
+    setStage((s) => (s === 0 ? 1 : 'done'));
+  }
+
+  const MediaTag = type === 'video' ? 'video' : 'audio';
+  const mediaProps = type === 'video' ? { playsInline: true } : {};
 
   return (
-    <div
-      className={
-        'ty-card' +
-        (isPicked ? ' ty-card-picked' : '') +
-        (isRevealed ? (isRealCard ? ' ty-card-real' : ' ty-card-fake') : '')
-      }
-    >
-      <div className="ty-card-label">{label}</div>
+    <div className="ty-locked-player">
+      <div className={'ty-locked-media-wrap' + (type === 'audio' ? ' ty-locked-media-wrap-audio' : '')}>
+        {stage === 'idle' && (
+          <button type="button" className="ty-play-btn" onClick={() => setStage(0)}>
+            <span className="ty-play-icon">▶</span> Play
+          </button>
+        )}
+        {stage !== 'idle' && (
+          <MediaTag
+            ref={mediaRef}
+            className={type === 'video' ? 'ty-media' : 'ty-media-audio'}
+            onEnded={handleEnded}
+            onContextMenu={(e) => e.preventDefault()}
+            {...mediaProps}
+          />
+        )}
+        {(stage === 0 || stage === 1) && <div className="ty-now-playing">Playing…</div>}
+      </div>
 
-      {type === 'video' ? (
-        <video className="ty-media" src={src} controls playsInline preload="metadata" />
-      ) : (
-        <audio className="ty-media-audio" src={src} controls preload="metadata" />
+      {stage === 'done' && (
+        <>
+          <p className="ty-locked-prompt">Which one was real?</p>
+          <div className="ty-locked-choices">
+            {[0, 1].map((posIndex) => {
+              const kind = order[posIndex];
+              const label = posIndex === 0 ? 'First clip' : 'Second clip';
+              const isPicked = pick === kind;
+              return (
+                <div key={posIndex} className="ty-locked-choice">
+                  {isRevealed && (
+                    <div className={'ty-badge ' + (kind === 'real' ? 'ty-badge-real' : 'ty-badge-fake')}>
+                      {kind === 'real' ? 'Real' : 'AI-generated'}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className={'ty-pick-btn' + (isPicked ? ' ty-pick-btn-active' : '')}
+                    onClick={() => onPick(kind)}
+                    disabled={isRevealed}
+                  >
+                    {isPicked ? 'Selected ✓' : label}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
-
-      {isRevealed && (
-        <div className={'ty-badge ' + (isRealCard ? 'ty-badge-real' : 'ty-badge-fake')}>
-          {isRealCard ? 'Real' : 'AI-generated'}
-        </div>
-      )}
-
-      <button
-        type="button"
-        className={'ty-pick-btn' + (isPicked ? ' ty-pick-btn-active' : '')}
-        onClick={() => onPick(kind)}
-        disabled={isRevealed}
-      >
-        {isPicked ? 'Selected ✓' : 'I think this is real'}
-      </button>
     </div>
   );
 }
 
-export default function QuizClient({ hasAudio }) {
-  const videoOrder = useMemo(randomOrder, []);
-  const audioOrder = useMemo(randomOrder, []);
-
-  const [videoPick, setVideoPick] = useState(null);
-  const [audioPick, setAudioPick] = useState(null);
+export default function QuizClient() {
+  const [picks, setPicks] = useState({});
   const [revealed, setRevealed] = useState(false);
   const [stats, setStats] = useState(null);
   const [headcount, setHeadcount] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
 
-  const canReveal = videoPick !== null && (!hasAudio || audioPick !== null);
-  const totalRounds = hasAudio ? 2 : 1;
-  const correctCount =
-    (videoPick === 'real' ? 1 : 0) + (hasAudio && audioPick === 'real' ? 1 : 0);
+  const allRounds = [
+    ...VIDEO_POOL.map((r) => ({ ...r, type: 'video' })),
+    ...AUDIO_POOL.map((r) => ({ ...r, type: 'audio' })),
+  ];
+
+  function setPick(roundId, kind) {
+    setPicks((prev) => ({ ...prev, [roundId]: kind }));
+  }
+
+  const canReveal = allRounds.length > 0 && allRounds.every((r) => picks[r.id] != null);
+  const totalRounds = allRounds.length;
+  const correctCount = allRounds.filter((r) => picks[r.id] === 'real').length;
 
   async function handleReveal() {
     setRevealed(true);
     setStats('loading');
 
-    const attempts = [{ itemType: 'video', correct: videoPick === 'real' }];
-    if (hasAudio) attempts.push({ itemType: 'audio', correct: audioPick === 'real' });
-
     try {
       await Promise.all(
-        attempts.map((a) =>
+        allRounds.map((r) =>
           fetch('/api/quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(a),
+            body: JSON.stringify({ itemType: r.type, correct: picks[r.id] === 'real' }),
           })
         )
       );
@@ -121,53 +161,55 @@ export default function QuizClient({ hasAudio }) {
           <span className="section-label">Test Yourself</span>
           <h2>How good are you at spotting a deepfake?</h2>
           <p>
-            Below are real and AI-generated clips of the same person. Watch each one, pick
-            the one you think is real, then hit reveal to see how you did.
+            Below are real and AI-generated clips of the same person. Each one only plays
+            once, so if you miss something — sound not turned up, got distracted, whatever —
+            just refresh the page for a fresh set. Pick the one you think is real, then hit
+            reveal to see how you did.
           </p>
         </div>
       </section>
 
-      {/* VIDEO ROUND */}
+      {/* VIDEO ROUNDS */}
       <section className="section" id="video-round">
         <div className="section-header">
-          <span className="section-label">Round 1 — Video</span>
+          <span className="section-label">Video</span>
           <h2>Which clip is real?</h2>
         </div>
-        <div className="ty-grid">
-          {videoOrder.map((kind, i) => (
-            <ClipCard
-              key={kind}
-              kind={kind}
-              type="video"
-              src={kind === 'real' ? VIDEO_REAL : VIDEO_FAKE}
-              label={i === 0 ? 'Clip A' : 'Clip B'}
-              isPicked={videoPick === kind}
-              isRevealed={revealed}
-              onPick={setVideoPick}
-            />
+        <div className="ty-rounds-stack">
+          {VIDEO_POOL.map((round, i) => (
+            <div key={round.id} className="ty-round-block">
+              {VIDEO_POOL.length > 1 && <div className="ty-round-index">Round {i + 1}</div>}
+              <LockedPairPlayer
+                round={round}
+                type="video"
+                pick={picks[round.id] ?? null}
+                isRevealed={revealed}
+                onPick={(kind) => setPick(round.id, kind)}
+              />
+            </div>
           ))}
         </div>
       </section>
 
-      {/* AUDIO ROUND */}
+      {/* AUDIO ROUNDS */}
       <section className="section section-gray" id="audio-round">
         <div className="section-header">
-          <span className="section-label">Round 2 — Audio</span>
+          <span className="section-label">Audio</span>
           <h2>Which voice is real?</h2>
         </div>
-        {hasAudio ? (
-          <div className="ty-grid">
-            {audioOrder.map((kind, i) => (
-              <ClipCard
-                key={kind}
-                kind={kind}
-                type="audio"
-                src={kind === 'real' ? AUDIO_REAL : AUDIO_FAKE}
-                label={i === 0 ? 'Clip A' : 'Clip B'}
-                isPicked={audioPick === kind}
-                isRevealed={revealed}
-                onPick={setAudioPick}
-              />
+        {AUDIO_POOL.length > 0 ? (
+          <div className="ty-rounds-stack">
+            {AUDIO_POOL.map((round, i) => (
+              <div key={round.id} className="ty-round-block">
+                {AUDIO_POOL.length > 1 && <div className="ty-round-index">Round {i + 1}</div>}
+                <LockedPairPlayer
+                  round={round}
+                  type="audio"
+                  pick={picks[round.id] ?? null}
+                  isRevealed={revealed}
+                  onPick={(kind) => setPick(round.id, kind)}
+                />
+              </div>
             ))}
           </div>
         ) : (

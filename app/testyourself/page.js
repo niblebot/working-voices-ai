@@ -5,8 +5,8 @@ import './testyourself.css';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'How Good Are You at Spotting a Deepfake? | Working Voices',
-  description: 'Test yourself against real and AI-generated video and audio, then see how many people in your organisation might be vulnerable to the same attack.',
+  title: 'Could You Spot a Deepfake? | Working Voices',
+  description: 'Test yourself against real and AI-generated video and voice, then find out why the instinct that just failed you is the same one scammers exploit.',
 };
 
 export default function TestYourselfPage() {

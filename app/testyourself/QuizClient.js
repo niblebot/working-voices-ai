@@ -284,6 +284,7 @@ export default function QuizClient() {
     <div className="ty-page">
       {/* 01 HOOK */}
       <section className="section section-dark ty-header ty-glow-section">
+        <div className="hero-grid-bg"></div>
         <div className="hero-glow"></div>
         <div className="hero-glow hero-glow-2"></div>
         <div className="ty-hook-grid">
@@ -294,7 +295,7 @@ export default function QuizClient() {
               <span className="ty-k-line2">spot a</span>
               <span className="ty-k-line3">deepfake?</span>
             </h2>
-            <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks that.</p>
+            <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks&nbsp;that.</p>
             <p>
               You're about to test that claim. Your job is to correctly identify the real
               person from three choices. You'll only have seconds to decide, and no chance to
@@ -312,6 +313,12 @@ export default function QuizClient() {
             )}
           </div>
           <div className="ty-hook-visual">
+            <img
+              className="ty-hook-visual-img"
+              src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=900&q=75&fit=crop"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="ty-hook-visual-tag">01 · The setup</div>
           </div>
         </div>
@@ -319,10 +326,9 @@ export default function QuizClient() {
 
       {/* 02/03 ROUNDS — one at a time */}
       {activeStage && (
-        <section
-          key={activeStage.key}
-          className={'section' + (activeStage.type === 'audio' ? ' section-gray' : '')}
-        >
+        <section key={activeStage.key} className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
+          <div className="hero-glow hero-glow-2"></div>
           <div className="section-header">
             <RoundTracker total={totalRounds} current={journeyStage} />
             <span className="ty-tracker-label">
@@ -371,6 +377,12 @@ export default function QuizClient() {
         <section className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="hero-glow hero-glow-2"></div>
+          <img
+            className="ty-reveal-bg-image"
+            src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1600&q=70&fit=crop"
+            alt=""
+            aria-hidden="true"
+          />
           <div className="section-header">
             <span className="section-label">The Reveal</span>
             <h2>So, how did you do?</h2>
@@ -393,7 +405,8 @@ export default function QuizClient() {
 
       {/* 06 THE BIG MISTAKE */}
       {journeyStage === 'reveal' && (
-        <section className="section section-gray">
+        <section className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">The Big Mistake</span>
             <h2>Everyone treats this as a cyber problem — it's not, it's psychological.</h2>
@@ -426,7 +439,8 @@ export default function QuizClient() {
 
       {/* 07 THE CASE AGAINST E-LEARNING */}
       {journeyStage === 'reveal' && (
-        <section className="section">
+        <section className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">The Case Against E-Learning</span>
             <h2>Why a training video is ineffective</h2>

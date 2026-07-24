@@ -12,16 +12,10 @@ const ROUNDS = [
     fakes: ['/testyourself/Fake - will smith.mp4', '/testyourself/fake  - best to do.mp4'],
   },
   {
-    id: 'video-nick',
+    id: 'video-1',
     type: 'video',
-    real: '/testyourself/Real-nick1.mp4',
-    fakes: ['/testyourself/AI-nick1.mp4'],
-  },
-  {
-    id: 'video-willsmith',
-    type: 'video',
-    real: '/testyourself/real -will smith.mp4',
-    fakes: ['/testyourself/fake - will smith video.mp4'],
+    real: '/testyourself/Real - social media.mp4',
+    fakes: ['/testyourself/Fake - bread pitt.mp4', '/testyourself/fake mouth.mp4'],
   },
 ];
 
@@ -39,7 +33,7 @@ function shuffledOptions(round) {
   return options;
 }
 
-function TimedRoundPlayer({ round, type, onComplete }) {
+function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [options] = useState(() => shuffledOptions(round));
   const [stage, setStage] = useState('idle'); // 'idle' | number | 'choosing'
   const [secondsLeft, setSecondsLeft] = useState(DECISION_SECONDS);
@@ -64,14 +58,14 @@ function TimedRoundPlayer({ round, type, onComplete }) {
     return () => clearInterval(intervalRef.current);
   }, [stage]);
 
-  // Separate from the interval above so the parent's onComplete (which updates
-  // QuizClient's state) never fires from inside a setState updater function.
+  // Separate from the interval above so the parent's state updates never
+  // fire from inside a setState updater function.
   useEffect(() => {
     if (stage !== 'choosing' || secondsLeft > 0 || answeredRef.current) return;
     answeredRef.current = true;
     clearInterval(intervalRef.current);
-    onComplete(false);
-  }, [secondsLeft, stage, onComplete]);
+    onTimeout();
+  }, [secondsLeft, stage, onTimeout]);
 
   function handleEnded() {
     setStage((s) => (typeof s === 'number' && s + 1 < options.length ? s + 1 : 'choosing'));
@@ -131,7 +125,7 @@ function TimedRoundPlayer({ round, type, onComplete }) {
 }
 
 export default function QuizClient() {
-  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into STAGES | 'reveal'
+  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into STAGES | 'reveal' | 'timedout'
   const [results, setResults] = useState([]);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
@@ -140,19 +134,26 @@ export default function QuizClient() {
     setJourneyStage(STAGES.length > 0 ? 0 : 'reveal');
   }
 
-  function handleStageComplete(correct) {
+  function logAttempt(correct) {
     const stage = STAGES[journeyStage];
-    setResults((prev) => [...prev, correct]);
-
     // Fire-and-forget — doesn't block the journey moving on.
     fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ itemType: stage.type, correct }),
     }).catch(() => {});
+  }
 
+  function handleStageComplete(correct) {
+    logAttempt(correct);
+    setResults((prev) => [...prev, correct]);
     const next = journeyStage + 1;
     setJourneyStage(next < STAGES.length ? next : 'reveal');
+  }
+
+  function handleStageTimeout() {
+    logAttempt(false);
+    setJourneyStage('timedout');
   }
 
   async function handleLeadSubmit(e) {
@@ -226,7 +227,23 @@ export default function QuizClient() {
             round={activeStage.round}
             type={activeStage.type}
             onComplete={handleStageComplete}
+            onTimeout={handleStageTimeout}
           />
+        </section>
+      )}
+
+      {/* TIMED OUT — dead stop, no continuing */}
+      {journeyStage === 'timedout' && (
+        <section className="section section-dark">
+          <div className="section-header">
+            <span className="section-label">Too Slow</span>
+            <h2>Time's up.</h2>
+            <p>
+              That's not bad luck — hesitation is exactly how these attacks work. A real
+              scammer doesn't wait for you to think it over.
+            </p>
+            <p>Refresh the page to try again.</p>
+          </div>
         </section>
       )}
 

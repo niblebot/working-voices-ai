@@ -166,19 +166,20 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [options] = useState(() => shuffledOptions(round));
   const [stage, setStage] = useState('idle'); // 'idle' | number | 'gap' | 'choosing'
   const [secondsLeft, setSecondsLeft] = useState(DECISION_SECONDS);
-  const mediaRef = useRef(null);
+  const mediaRefs = useRef([]);
   const answeredRef = useRef(false);
   const intervalRef = useRef(null);
   const nextIndexRef = useRef(0);
   const choicesRef = useRef(null);
 
+  // Each clip after the first advances automatically (via onEnded), with no
+  // user gesture of its own — mobile Safari silently refuses to play that,
+  // which is why it used to freeze on clip 2. Fixed below by mounting every
+  // clip's element up front and priming them all inside the Play tap.
   useEffect(() => {
-    const el = mediaRef.current;
-    if (!el || typeof stage !== 'number') return;
-    el.src = encodeURI(options[stage].src);
-    el.load();
-    el.play().catch(() => {});
-  }, [stage, options]);
+    if (typeof stage !== 'number') return;
+    mediaRefs.current[stage]?.play().catch(() => {});
+  }, [stage]);
 
   // The clips can take the choice buttons out of view (especially after
   // scrolling away to watch), so bring them into view the moment they appear.
@@ -234,6 +235,29 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     onComplete(kind === 'real');
   }
 
+  // The Play tap is the one real user gesture we get for the whole round.
+  // Clip 0 plays for real here; every other clip gets a muted play+pause
+  // "touch" so mobile browsers treat it as already-unlocked when its turn
+  // comes later via onEnded, with no gesture behind it at that point.
+  function handleStart() {
+    mediaRefs.current.forEach((el, i) => {
+      if (!el) return;
+      if (i === 0) {
+        el.play().catch(() => {});
+        return;
+      }
+      el.muted = true;
+      el.play()
+        .then(() => {
+          el.pause();
+          el.currentTime = 0;
+          el.muted = false;
+        })
+        .catch(() => {});
+    });
+    setStage(0);
+  }
+
   const MediaTag = type === 'video' ? 'video' : 'audio';
   const mediaProps = type === 'video' ? { playsInline: true } : {};
 
@@ -241,19 +265,25 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     <div className="ty-locked-player">
       <div className={'ty-locked-media-wrap' + (type === 'audio' ? ' ty-locked-media-wrap-audio' : '')}>
         {stage === 'idle' && (
-          <button type="button" className="ty-play-btn" onClick={() => setStage(0)}>
+          <button type="button" className="ty-play-btn" onClick={handleStart}>
             <span className="ty-play-icon">▶</span> Play
           </button>
         )}
-        {typeof stage === 'number' && (
+        {options.map((opt, i) => (
           <MediaTag
-            ref={mediaRef}
+            key={i}
+            ref={(el) => {
+              mediaRefs.current[i] = el;
+            }}
+            src={encodeURI(opt.src)}
+            preload="metadata"
             className={type === 'video' ? 'ty-media' : 'ty-media-audio'}
-            onEnded={handleEnded}
+            style={{ display: stage === i ? undefined : 'none' }}
+            onEnded={stage === i ? handleEnded : undefined}
             onContextMenu={(e) => e.preventDefault()}
             {...mediaProps}
           />
-        )}
+        ))}
         {typeof stage === 'number' && (
           <div className="ty-clip-counter">
             Clip {stage + 1} of {options.length}

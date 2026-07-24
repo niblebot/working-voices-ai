@@ -138,10 +138,10 @@
   inset: 0;
   z-index: 0;
   background: radial-gradient(
-    ellipse 70% 60% at 50% 50%,
-    rgba(3, 16, 27, 0.92) 0%,
-    rgba(3, 16, 27, 0.6) 55%,
-    rgba(3, 16, 27, 0.15) 100%
+    ellipse 75% 75% at 50% 50%,
+    rgba(3, 16, 27, 0.94) 0%,
+    rgba(3, 16, 27, 0.8) 60%,
+    rgba(3, 16, 27, 0.25) 100%
   );
 }
 
@@ -274,8 +274,8 @@
 .ty-locked-player {
   max-width: 680px;
   margin: 0 auto;
-  background: var(--white);
-  border: 2px solid #e8ecf1;
+  background: var(--ty-ink-2);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 20px;
   padding: 22px;
   display: flex;
@@ -371,7 +371,7 @@
 .ty-locked-prompt {
   font-size: 15px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--white);
 }
 
 .ty-ring-box {
@@ -387,7 +387,7 @@
 
 .ty-ring-track {
   fill: none;
-  stroke: #e8ecf1;
+  stroke: rgba(255, 255, 255, 0.14);
   stroke-width: 8;
 }
 
@@ -413,7 +413,7 @@
   justify-content: center;
   font-family: 'DM Serif Display', serif;
   font-size: 40px;
-  color: var(--navy);
+  color: var(--white);
   font-variant-numeric: tabular-nums;
 }
 
@@ -424,9 +424,9 @@
 }
 
 .ty-pick-btn {
-  background: var(--gray-light);
-  color: var(--navy);
-  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   padding: 16px 24px;
   font-family: 'Red Hat Display', sans-serif;
@@ -437,7 +437,7 @@
 }
 
 .ty-pick-btn:hover:not(:disabled) {
-  background: #e8ecf1;
+  background: rgba(255, 255, 255, 0.12);
   border-color: var(--yellow);
   transform: translateX(3px);
 }

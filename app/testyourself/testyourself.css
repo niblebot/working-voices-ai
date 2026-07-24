@@ -30,6 +30,10 @@
   color: var(--blue);
 }
 
+.ty-page .video-embed-wrap {
+  max-width: 1040px;
+}
+
 .ty-page .section-header h2 {
   font-size: clamp(38px, 4.6vw, 58px);
 }
@@ -272,7 +276,7 @@
 
 /* PLAYER */
 .ty-locked-player {
-  max-width: 680px;
+  max-width: 780px;
   margin: 0 auto;
   background: var(--ty-ink-2);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -650,4 +654,41 @@
   opacity: 0.25;
   -webkit-mask-image: linear-gradient(180deg, transparent, black 35%, black 65%, transparent);
   mask-image: linear-gradient(180deg, transparent, black 35%, black 65%, transparent);
+}
+
+/* MOBILE — the quiz player and Vimeo embed bleed edge-to-edge so the video
+   itself gets real size on a phone screen, instead of being squeezed by
+   the section's side padding plus the card's own padding stacking up. */
+@media (max-width: 860px) {
+  .ty-page .section {
+    padding: 48px 20px;
+  }
+
+  .ty-locked-player {
+    max-width: none;
+    margin: 0 -20px;
+    padding: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .ty-locked-media-wrap {
+    border-radius: 0;
+  }
+
+  .ty-timer-row,
+  .ty-locked-choices {
+    padding: 0 20px;
+  }
+
+  .ty-locked-choices {
+    padding-bottom: 18px;
+  }
+
+  .ty-page .video-embed-wrap {
+    max-width: none;
+    margin: 0 -20px;
+    border-radius: 0;
+  }
 }

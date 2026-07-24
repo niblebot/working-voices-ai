@@ -40,6 +40,8 @@ const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
 const GAP_MS = 1500; // pause between clips within a round
 const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
+const RING_RADIUS = 54;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 function shuffled(arr) {
   const copy = [...arr];
@@ -78,6 +80,38 @@ function shuffledOptions(round) {
   return shuffled(options);
 }
 
+function RoundTracker({ total, current }) {
+  return (
+    <div className="ty-tracker">
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} className={'ty-tracker-pill' + (i < current ? ' done' : i === current ? ' active' : '')}>
+          {i + 1}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CountdownRing({ secondsLeft }) {
+  const frac = Math.max(0, secondsLeft) / DECISION_SECONDS;
+  const offset = RING_CIRCUMFERENCE * (1 - frac);
+  return (
+    <div className="ty-ring-box">
+      <svg width="128" height="128" viewBox="0 0 128 128">
+        <circle className="ty-ring-track" cx="64" cy="64" r={RING_RADIUS} />
+        <circle
+          className={'ty-ring-fill' + (secondsLeft <= 2 ? ' urgent' : '')}
+          cx="64"
+          cy="64"
+          r={RING_RADIUS}
+          style={{ strokeDasharray: RING_CIRCUMFERENCE, strokeDashoffset: offset }}
+        />
+      </svg>
+      <div className="ty-ring-num">{Math.ceil(secondsLeft)}</div>
+    </div>
+  );
+}
+
 function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [options] = useState(() => shuffledOptions(round));
   const [stage, setStage] = useState('idle'); // 'idle' | number | 'gap' | 'choosing'
@@ -103,12 +137,14 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     return () => clearTimeout(t);
   }, [stage]);
 
+  // Ticks every 100ms (not 1s) so the countdown ring drains smoothly.
   useEffect(() => {
     if (stage !== 'choosing') return undefined;
     setSecondsLeft(DECISION_SECONDS);
+    const start = Date.now();
     intervalRef.current = setInterval(() => {
-      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
-    }, 1000);
+      setSecondsLeft(Math.max(0, DECISION_SECONDS - (Date.now() - start) / 1000));
+    }, 100);
     return () => clearInterval(intervalRef.current);
   }, [stage]);
 
@@ -176,7 +212,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
         <>
           <div className="ty-timer-row">
             <p className="ty-locked-prompt">Which one was real?</p>
-            <div className={'ty-timer' + (secondsLeft <= 2 ? ' ty-timer-urgent' : '')}>{secondsLeft}s</div>
+            <CountdownRing secondsLeft={secondsLeft} />
           </div>
           <div className="ty-locked-choices" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
             {options.map((opt, i) => (
@@ -247,26 +283,37 @@ export default function QuizClient() {
   return (
     <div className="ty-page">
       {/* 01 HOOK */}
-      <section className="section section-dark ty-header">
-        <div className="section-header">
-          <span className="section-label">Test Yourself</span>
-          <h2>Could you spot a deepfake?</h2>
-          <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks that.</p>
-          <p>
-            You're about to test that claim. Your job is to correctly identify the real
-            person from three choices. You'll only have seconds to decide, and no chance to
-            go back. Exactly like in real{' '}life.
-          </p>
-          {journeyStage === 'hook' && (
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={handleStart}
-              disabled={stages.length === 0}
-            >
-              Start the challenge
-            </button>
-          )}
+      <section className="section section-dark ty-header ty-glow-section">
+        <div className="hero-glow"></div>
+        <div className="hero-glow hero-glow-2"></div>
+        <div className="ty-hook-grid">
+          <div className="section-header ty-hook-content">
+            <span className="section-label">Test Yourself</span>
+            <h2 className="ty-kinetic-heading">
+              <span className="ty-k-line1">Could you</span>
+              <span className="ty-k-line2">spot a</span>
+              <span className="ty-k-line3">deepfake?</span>
+            </h2>
+            <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks that.</p>
+            <p>
+              You're about to test that claim. Your job is to correctly identify the real
+              person from three choices. You'll only have seconds to decide, and no chance to
+              go back. Exactly like in real{' '}life.
+            </p>
+            {journeyStage === 'hook' && (
+              <button
+                type="button"
+                className="ty-cta-btn"
+                onClick={handleStart}
+                disabled={stages.length === 0}
+              >
+                Start the challenge →
+              </button>
+            )}
+          </div>
+          <div className="ty-hook-visual">
+            <div className="ty-hook-visual-tag">01 · The setup</div>
+          </div>
         </div>
       </section>
 
@@ -277,10 +324,11 @@ export default function QuizClient() {
           className={'section' + (activeStage.type === 'audio' ? ' section-gray' : '')}
         >
           <div className="section-header">
-            <span className="section-label">
-              Round {journeyStage + 1} · {activeStage.type === 'audio' ? 'Voice' : 'Video'}
+            <RoundTracker total={totalRounds} current={journeyStage} />
+            <span className="ty-tracker-label">
+              Round {journeyStage + 1} of {totalRounds} · {activeStage.type === 'audio' ? 'Voice' : 'Video'}
             </span>
-            <h2>
+            <h2 style={{ marginTop: 20 }}>
               {activeStage.type === 'audio'
                 ? 'Real voice, or clone?'
                 : 'Now watch closely. Which one is real?'}
@@ -303,8 +351,10 @@ export default function QuizClient() {
 
       {/* TIMED OUT — dead stop, no continuing */}
       {journeyStage === 'timedout' && (
-        <section className="section section-dark">
+        <section className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
           <div className="section-header">
+            <div className="ty-timedout-icon">⏱</div>
             <span className="section-label">Too Slow</span>
             <h2>Time's up.</h2>
             <p>
@@ -318,12 +368,14 @@ export default function QuizClient() {
 
       {/* 04 THE REVEAL */}
       {journeyStage === 'reveal' && (
-        <section className="section section-dark">
+        <section className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
+          <div className="hero-glow hero-glow-2"></div>
           <div className="section-header">
             <span className="section-label">The Reveal</span>
             <h2>So, how did you do?</h2>
             <p className="ty-result-banner">
-              You got {correctCount} of {totalRounds} right.
+              {correctCount} / {totalRounds}
             </p>
             <p>
               Getting it wrong means your brain did exactly what it's built to do, which is
@@ -398,10 +450,13 @@ export default function QuizClient() {
 
       {/* 08 TRY A DEMO */}
       {journeyStage === 'reveal' && (
-        <section className="cta-section">
+        <section className="cta-section ty-glow-section" style={{ background: 'var(--navy)' }}>
+          <div className="hero-glow"></div>
+          <div className="hero-glow hero-glow-2"></div>
           <div className="ty-demo-frame">
-            <h2>The solution for your organisation</h2>
-            <p>
+            <span className="section-label">Ready When You Are</span>
+            <h2 style={{ color: 'var(--white)', marginTop: 12 }}>The solution for your organisation</h2>
+            <p style={{ color: 'rgba(255,255,255,0.75)' }}>
               Book a 15-minute live demo with our CEO Nick Smallman and lead trainer Andy
               Day. You'll learn:
             </p>
@@ -422,7 +477,7 @@ export default function QuizClient() {
                   placeholder="you@company.com"
                   className="ty-input"
                 />
-                <button type="submit" className="btn-white" disabled={leadStatus === 'submitting'}>
+                <button type="submit" className="ty-cta-btn" disabled={leadStatus === 'submitting'}>
                   {leadStatus === 'submitting' ? 'Sending…' : 'Book a demo'}
                 </button>
               </form>

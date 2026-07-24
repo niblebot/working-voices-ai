@@ -2,21 +2,30 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Each round needs one real clip and one or more fakes. Add more fakes
-// per round, or a VOICE_ROUND entry, as assets land — no other code
-// changes needed. A round with no assets is simply skipped.
-const VOICE_ROUND = null;
-
-const VIDEO_ROUND = {
-  id: 'video-1',
-  real: '/testyourself/Real-nick1.mp4',
-  fakes: ['/testyourself/AI-nick1.mp4'],
-};
-
-const STAGES = [
-  ...(VOICE_ROUND ? [{ key: 'voice', type: 'audio', round: VOICE_ROUND }] : []),
-  ...(VIDEO_ROUND ? [{ key: 'video', type: 'video', round: VIDEO_ROUND }] : []),
+// Each round needs one real clip and one or more fakes. Add or reorder
+// entries as new clips land — no other code changes needed.
+const ROUNDS = [
+  {
+    id: 'voice-1',
+    type: 'audio',
+    real: '/testyourself/real - will smith.mp4',
+    fakes: ['/testyourself/Fake - will smith.mp4', '/testyourself/fake  - best to do.mp4'],
+  },
+  {
+    id: 'video-nick',
+    type: 'video',
+    real: '/testyourself/Real-nick1.mp4',
+    fakes: ['/testyourself/AI-nick1.mp4'],
+  },
+  {
+    id: 'video-willsmith',
+    type: 'video',
+    real: '/testyourself/real -will smith.mp4',
+    fakes: ['/testyourself/fake - will smith video.mp4'],
+  },
 ];
+
+const STAGES = ROUNDS.map((round) => ({ key: round.id, type: round.type, round }));
 
 const DECISION_SECONDS = 5;
 const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
@@ -41,7 +50,7 @@ function TimedRoundPlayer({ round, type, onComplete }) {
   useEffect(() => {
     const el = mediaRef.current;
     if (!el || typeof stage !== 'number') return;
-    el.src = options[stage].src;
+    el.src = encodeURI(options[stage].src);
     el.load();
     el.play().catch(() => {});
   }, [stage, options]);
@@ -195,21 +204,21 @@ export default function QuizClient() {
       {activeStage && (
         <section
           key={activeStage.key}
-          className={'section' + (activeStage.key === 'voice' ? ' section-gray' : '')}
+          className={'section' + (activeStage.type === 'audio' ? ' section-gray' : '')}
         >
           <div className="section-header">
             <span className="section-label">
-              Round {journeyStage + 1} · {activeStage.key === 'voice' ? 'Voice' : 'Video'}
+              Round {journeyStage + 1} · {activeStage.type === 'audio' ? 'Voice' : 'Video'}
             </span>
             <h2>
-              {activeStage.key === 'voice'
+              {activeStage.type === 'audio'
                 ? 'Real voice, or clone?'
                 : 'Now watch closely. Which one is real?'}
             </h2>
             <p>
-              {activeStage.key === 'voice'
-                ? "You'll hear three short voice clips of the same person. One is real. Two are AI. You have five seconds to choose."
-                : 'Three video clips. One is the real person. Five seconds. Choose fast.'}
+              {activeStage.type === 'audio'
+                ? `You'll hear ${activeStage.round.fakes.length + 1} short voice clips of the same person. One is real. You have five seconds to choose.`
+                : `Watch ${activeStage.round.fakes.length + 1} video clips. One is the real person. Five seconds. Choose fast.`}
             </p>
           </div>
           <TimedRoundPlayer

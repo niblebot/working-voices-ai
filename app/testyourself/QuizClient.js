@@ -244,19 +244,6 @@ export default function QuizClient() {
         </section>
       )}
 
-      {/* AWARENESS VIDEO — placeholder, left as-is pending confirmation on where this section lands */}
-      {journeyStage === 'reveal' && (
-        <section className="section">
-          <div className="section-header">
-            <span className="section-label">How They Do It</span>
-            <h2>The tricks and techniques behind these attacks</h2>
-          </div>
-          <div className="ty-video-placeholder">
-            Awareness video embed goes here — pending final asset/link from Scott.
-          </div>
-        </section>
-      )}
-
       {/* 06 THE BIG MISTAKE */}
       {journeyStage === 'reveal' && (
         <section className="section section-gray">
@@ -292,16 +279,8 @@ export default function QuizClient() {
 
       {/* 08 TRY A DEMO */}
       {journeyStage === 'reveal' && (
-        <section className="cta-section ty-broadcast">
-          <div className="ty-broadcast-frame">
-            <span className="ty-corner ty-corner-tl" />
-            <span className="ty-corner ty-corner-tr" />
-            <span className="ty-corner ty-corner-bl" />
-            <span className="ty-corner ty-corner-br" />
-            <div className="ty-broadcast-badge">
-              <span className="ty-broadcast-dot" />
-              Security Broadcast
-            </div>
+        <section className="cta-section">
+          <div className="ty-demo-frame">
             <h2>The solution for your organisation</h2>
             <p>
               Book a 15-minute live demo with our CEO Nick Smallman and lead trainer Andy

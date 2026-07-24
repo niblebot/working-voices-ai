@@ -125,22 +125,41 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: -1;
-  opacity: 0.65;
-  mix-blend-mode: luminosity;
+  z-index: 0;
+  opacity: 0.9;
 }
 
+/* Radial vignette instead of a full-width wash — keeps the text zone (the
+   center, where it sits) legible while letting the photo actually show
+   at the edges instead of being crushed everywhere. */
 .ty-hook-hero::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(3, 16, 27, 0.9) 0%,
-    rgba(3, 16, 27, 0.75) 50%,
-    rgba(3, 16, 27, 0.9) 100%
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(3, 16, 27, 0.92) 0%,
+    rgba(3, 16, 27, 0.6) 55%,
+    rgba(3, 16, 27, 0.15) 100%
   );
+}
+
+/* Explicit stacking within the shared z-index:0 tier: image first (back),
+   then the grid texture / glow accents, then the scrim on top of those so
+   the vignette actually darkens them too, keeping the text zone legible. */
+.ty-hook-hero-img {
+  z-index: 0;
+}
+.ty-hook-hero .hero-grid-bg,
+.ty-hook-hero .hero-glow {
+  z-index: 1;
+}
+.ty-hook-hero::before {
+  z-index: 2;
+}
+.ty-hook-hero .ty-hook-content {
+  z-index: 3;
 }
 
 .ty-kinetic-heading {

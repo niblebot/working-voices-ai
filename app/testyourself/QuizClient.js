@@ -2,35 +2,70 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Each round needs one real clip and one or more fakes. Add or reorder
-// entries as new clips land — no other code changes needed.
-const ROUNDS = [
-  {
-    id: 'voice-1',
-    type: 'audio',
-    real: '/testyourself/real - will smith.mp4',
-    fakes: ['/testyourself/Fake - will smith.mp4', '/testyourself/fake  - best to do.mp4'],
+// Pools of clips per round type. Real and fakes don't need to match by
+// subject — add any real or fake clip to the relevant pool and it becomes
+// eligible to be drawn. Each page load randomly draws one real + two fakes
+// per round from these pools, so the exact set changes on every refresh.
+const POOLS = {
+  audio: {
+    reals: [
+      '/testyourself/real - in skin.mp4',
+      '/testyourself/real - mouth.mp4',
+      '/testyourself/real - people.mp4',
+      '/testyourself/real - tom .mp4',
+      '/testyourself/real - will smith.mp4',
+    ],
+    fakes: [
+      '/testyourself/Fake - will smith.mp4',
+      '/testyourself/fake  - best to do.mp4',
+      '/testyourself/fake  - signature.mp4',
+    ],
   },
-  {
-    id: 'video-1',
-    type: 'video',
-    real: '/testyourself/Real - social media.mp4',
-    fakes: ['/testyourself/Fake - bread pitt.mp4', '/testyourself/fake mouth.mp4'],
+  video: {
+    reals: [
+      '/testyourself/real - comfotable.mp4',
+      '/testyourself/real -will smith.mp4',
+      '/testyourself/Real - social media.mp4',
+    ],
+    fakes: [
+      '/testyourself/fake - will smith video.mp4',
+      '/testyourself/Fake - bread pitt.mp4',
+      '/testyourself/fake mouth.mp4',
+    ],
   },
-];
+};
 
-const STAGES = ROUNDS.map((round) => ({ key: round.id, type: round.type, round }));
-
+const ROUND_ORDER = ['audio', 'video']; // voice first, then video
+const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
 const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
 
+function shuffled(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function drawRandomRound(type) {
+  const pool = POOLS[type];
+  const real = pool.reals[Math.floor(Math.random() * pool.reals.length)];
+  const fakes = shuffled(pool.fakes).slice(0, Math.min(FAKES_PER_ROUND, pool.fakes.length));
+  return { real, fakes };
+}
+
+function buildStages() {
+  return ROUND_ORDER.filter((type) => POOLS[type].reals.length > 0).map((type, i) => {
+    const id = `${type}-${i}`;
+    return { key: id, type, round: { id, ...drawRandomRound(type) } };
+  });
+}
+
 function shuffledOptions(round) {
   const options = [{ kind: 'real', src: round.real }, ...round.fakes.map((src) => ({ kind: 'fake', src }))];
-  for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [options[i], options[j]] = [options[j], options[i]];
-  }
-  return options;
+  return shuffled(options);
 }
 
 function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
@@ -125,17 +160,19 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
 }
 
 export default function QuizClient() {
-  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into STAGES | 'reveal' | 'timedout'
+  // Drawn once per page load, so the exact clip set changes on every refresh.
+  const [stages] = useState(buildStages);
+  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into stages | 'reveal' | 'timedout'
   const [results, setResults] = useState([]);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
 
   function handleStart() {
-    setJourneyStage(STAGES.length > 0 ? 0 : 'reveal');
+    setJourneyStage(stages.length > 0 ? 0 : 'reveal');
   }
 
   function logAttempt(correct) {
-    const stage = STAGES[journeyStage];
+    const stage = stages[journeyStage];
     // Fire-and-forget — doesn't block the journey moving on.
     fetch('/api/quiz', {
       method: 'POST',
@@ -148,7 +185,7 @@ export default function QuizClient() {
     logAttempt(correct);
     setResults((prev) => [...prev, correct]);
     const next = journeyStage + 1;
-    setJourneyStage(next < STAGES.length ? next : 'reveal');
+    setJourneyStage(next < stages.length ? next : 'reveal');
   }
 
   function handleStageTimeout() {
@@ -172,8 +209,8 @@ export default function QuizClient() {
   }
 
   const correctCount = results.filter(Boolean).length;
-  const totalRounds = STAGES.length;
-  const activeStage = typeof journeyStage === 'number' ? STAGES[journeyStage] : null;
+  const totalRounds = stages.length;
+  const activeStage = typeof journeyStage === 'number' ? stages[journeyStage] : null;
 
   return (
     <div className="ty-page">
@@ -193,7 +230,7 @@ export default function QuizClient() {
               type="button"
               className="btn-primary"
               onClick={handleStart}
-              disabled={STAGES.length === 0}
+              disabled={stages.length === 0}
             >
               Start the challenge
             </button>

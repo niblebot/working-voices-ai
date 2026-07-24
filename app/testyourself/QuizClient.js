@@ -185,7 +185,7 @@ export default function QuizClient() {
           <p>
             You're about to test that claim. Your job is to correctly identify the real
             person from three choices. You'll only have seconds to decide, and no chance to
-            go back. Exactly like in real life.
+            go back. Exactly like in real{' '}life.
           </p>
           {journeyStage === 'hook' && (
             <button

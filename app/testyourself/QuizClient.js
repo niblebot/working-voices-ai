@@ -43,6 +43,56 @@ const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
 const RING_RADIUS = 54;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
+function scrollToRef(ref, opts) {
+  // Deferred a frame — calling scrollIntoView synchronously inside the
+  // effect that reacts to the state change it happened alongside is
+  // unreliable (it can land mid-layout and silently no-op).
+  requestAnimationFrame(() => {
+    const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    ref.current?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', ...opts });
+  });
+}
+
+const POST_REVEAL_LABELS = [
+  'The Reveal',
+  'The Big Mistake',
+  'See It For Yourself',
+  'The Case Against E-Learning',
+  'Ready When You Are',
+];
+
+function PostRevealNav({ refs, activeIndex, onNavigate }) {
+  function goTo(i) {
+    onNavigate(i);
+    scrollToRef(refs[i], { block: 'start' });
+  }
+  return (
+    <div className="ty-postreveal-nav">
+      <div className="ty-postreveal-dots">
+        {refs.map((ref, i) => (
+          <button
+            key={i}
+            type="button"
+            className={'ty-postreveal-dot' + (i === activeIndex ? ' active' : '')}
+            aria-label={POST_REVEAL_LABELS[i] ?? `Section ${i + 1}`}
+            onClick={() => goTo(i)}
+          />
+        ))}
+      </div>
+      {activeIndex < refs.length - 1 && (
+        <button
+          type="button"
+          className="ty-postreveal-next"
+          aria-label={`Next: ${POST_REVEAL_LABELS[activeIndex + 1]}`}
+          onClick={() => goTo(activeIndex + 1)}
+        >
+          ↓
+        </button>
+      )}
+    </div>
+  );
+}
+
 function shuffled(arr) {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -120,6 +170,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const answeredRef = useRef(false);
   const intervalRef = useRef(null);
   const nextIndexRef = useRef(0);
+  const choicesRef = useRef(null);
 
   useEffect(() => {
     const el = mediaRef.current;
@@ -128,6 +179,13 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     el.load();
     el.play().catch(() => {});
   }, [stage, options]);
+
+  // The clips can take the choice buttons out of view (especially after
+  // scrolling away to watch), so bring them into view the moment they appear.
+  useEffect(() => {
+    if (stage !== 'choosing') return;
+    scrollToRef(choicesRef, { block: 'center' });
+  }, [stage]);
 
   // Brief pause between clips so they don't blend together, and so the
   // "Clip X of Y" counter has a clear moment to be seen.
@@ -214,7 +272,11 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
             <p className="ty-locked-prompt">Which one was real?</p>
             <CountdownRing secondsLeft={secondsLeft} />
           </div>
-          <div className="ty-locked-choices" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+          <div
+            ref={choicesRef}
+            className="ty-locked-choices"
+            style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}
+          >
             {options.map((opt, i) => (
               <button key={i} type="button" className="ty-pick-btn" onClick={() => handleChoice(opt.kind)}>
                 {OPTION_LABELS[i] ?? `Option ${i + 1}`}
@@ -234,6 +296,49 @@ export default function QuizClient() {
   const [results, setResults] = useState([]);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
+  const activeSectionRef = useRef(null);
+
+  // Each journey stage (a round, timed-out, reveal) swaps in below whatever
+  // the user was already looking at, so without this the page just sits
+  // still and it looks like the button/choice did nothing.
+  useEffect(() => {
+    if (journeyStage === 'hook') return;
+    scrollToRef(activeSectionRef, { block: 'start' });
+  }, [journeyStage]);
+
+  // Post-reveal sections (Reveal, Big Mistake, Video, E-learning, Demo) get
+  // a PowerPoint-style dot/next nav so it's obvious there's more below the
+  // fold, instead of reading as one long scroll.
+  const revealRef = useRef(null);
+  const bigMistakeRef = useRef(null);
+  const videoSectionRef = useRef(null);
+  const elearningRef = useRef(null);
+  const demoRef = useRef(null);
+  const postRevealRefs = [revealRef, bigMistakeRef, videoSectionRef, elearningRef, demoRef];
+  const [activePostRevealIndex, setActivePostRevealIndex] = useState(0);
+
+  useEffect(() => {
+    if (journeyStage !== 'reveal') return undefined;
+    const els = postRevealRefs.map((r) => r.current).filter(Boolean);
+    if (els.length === 0) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let best = null;
+        for (const entry of entries) {
+          if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) {
+            best = entry;
+          }
+        }
+        if (best) {
+          const idx = els.indexOf(best.target);
+          if (idx !== -1) setActivePostRevealIndex(idx);
+        }
+      },
+      { threshold: [0.3, 0.5, 0.7] }
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [journeyStage]);
 
   function handleStart() {
     setJourneyStage(stages.length > 0 ? 0 : 'reveal');
@@ -283,50 +388,45 @@ export default function QuizClient() {
   return (
     <div className="ty-page">
       {/* 01 HOOK */}
-      <section className="section section-dark ty-header ty-glow-section">
+      <section className="section section-dark ty-header ty-glow-section ty-hook-hero">
+        <img
+          className="ty-hook-hero-img"
+          src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1600&q=75&fit=crop"
+          alt=""
+          aria-hidden="true"
+        />
         <div className="hero-grid-bg"></div>
         <div className="hero-glow"></div>
         <div className="hero-glow hero-glow-2"></div>
-        <div className="ty-hook-grid">
-          <div className="section-header ty-hook-content">
-            <span className="section-label">Test Yourself</span>
-            <h2 className="ty-kinetic-heading">
-              <span className="ty-k-line1">Could you</span>
-              <span className="ty-k-line2">spot a</span>
-              <span className="ty-k-line3">deepfake?</span>
-            </h2>
-            <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks&nbsp;that.</p>
-            <p>
-              You're about to test that claim. Your job is to correctly identify the real
-              person from three choices. You'll only have seconds to decide, and no chance to
-              go back. Exactly like in real{' '}life.
-            </p>
-            {journeyStage === 'hook' && (
-              <button
-                type="button"
-                className="ty-cta-btn"
-                onClick={handleStart}
-                disabled={stages.length === 0}
-              >
-                Start the challenge →
-              </button>
-            )}
-          </div>
-          <div className="ty-hook-visual">
-            <img
-              className="ty-hook-visual-img"
-              src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=900&q=75&fit=crop"
-              alt=""
-              aria-hidden="true"
-            />
-            <div className="ty-hook-visual-tag">01 · The setup</div>
-          </div>
+        <div className="section-header ty-hook-content">
+          <span className="section-label">Test Yourself</span>
+          <h2 className="ty-kinetic-heading">
+            <span className="ty-k-line1">Could you</span>
+            <span className="ty-k-line2">spot a</span>
+            <span className="ty-k-line3">deepfake?</span>
+          </h2>
+          <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks&nbsp;that.</p>
+          <p>
+            You're about to test that claim. Your job is to correctly identify the real
+            person from three choices. You'll only have seconds to decide, and no chance to
+            go back. Exactly like in real{' '}life.
+          </p>
+          {journeyStage === 'hook' && (
+            <button
+              type="button"
+              className="ty-cta-btn"
+              onClick={handleStart}
+              disabled={stages.length === 0}
+            >
+              Start the challenge →
+            </button>
+          )}
         </div>
       </section>
 
       {/* 02/03 ROUNDS — one at a time */}
       {activeStage && (
-        <section key={activeStage.key} className="section section-dark ty-glow-section">
+        <section key={activeStage.key} ref={activeSectionRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="hero-glow hero-glow-2"></div>
           <div className="section-header">
@@ -357,7 +457,7 @@ export default function QuizClient() {
 
       {/* TIMED OUT — dead stop, no continuing */}
       {journeyStage === 'timedout' && (
-        <section className="section section-dark ty-glow-section">
+        <section ref={activeSectionRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="section-header">
             <div className="ty-timedout-icon">⏱</div>
@@ -374,7 +474,13 @@ export default function QuizClient() {
 
       {/* 04 THE REVEAL */}
       {journeyStage === 'reveal' && (
-        <section className="section section-dark ty-glow-section">
+        <section
+          ref={(el) => {
+            activeSectionRef.current = el;
+            revealRef.current = el;
+          }}
+          className="section section-dark ty-glow-section"
+        >
           <div className="hero-glow"></div>
           <div className="hero-glow hero-glow-2"></div>
           <img
@@ -386,9 +492,9 @@ export default function QuizClient() {
           <div className="section-header">
             <span className="section-label">The Reveal</span>
             <h2>So, how did you do?</h2>
-            <p className="ty-result-banner">
+            <div className="ty-result-banner">
               {correctCount} / {totalRounds}
-            </p>
+            </div>
             <p>
               Getting it wrong means your brain did exactly what it's built to do, which is
               to trust a calm and confident request. That is the instinct scammers are
@@ -405,7 +511,7 @@ export default function QuizClient() {
 
       {/* 06 THE BIG MISTAKE */}
       {journeyStage === 'reveal' && (
-        <section className="section section-dark ty-glow-section">
+        <section ref={bigMistakeRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">The Big Mistake</span>
@@ -420,7 +526,7 @@ export default function QuizClient() {
 
       {/* SEE IT FOR YOURSELF — promo video */}
       {journeyStage === 'reveal' && (
-        <section className="section section-video">
+        <section ref={videoSectionRef} className="section section-video">
           <div className="section-header">
             <span className="section-label" style={{ color: 'var(--blue)' }}>See It For Yourself</span>
             <h2 style={{ color: 'var(--white)' }}>What you just experienced, taken further</h2>
@@ -439,7 +545,7 @@ export default function QuizClient() {
 
       {/* 07 THE CASE AGAINST E-LEARNING */}
       {journeyStage === 'reveal' && (
-        <section className="section section-dark ty-glow-section">
+        <section ref={elearningRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">The Case Against E-Learning</span>
@@ -464,7 +570,7 @@ export default function QuizClient() {
 
       {/* 08 TRY A DEMO */}
       {journeyStage === 'reveal' && (
-        <section className="cta-section ty-glow-section" style={{ background: 'var(--navy)' }}>
+        <section ref={demoRef} className="cta-section ty-glow-section" style={{ background: 'var(--navy)' }}>
           <div className="hero-glow"></div>
           <div className="hero-glow hero-glow-2"></div>
           <div className="ty-demo-frame">
@@ -501,6 +607,14 @@ export default function QuizClient() {
             )}
           </div>
         </section>
+      )}
+
+      {journeyStage === 'reveal' && (
+        <PostRevealNav
+          refs={postRevealRefs}
+          activeIndex={activePostRevealIndex}
+          onNavigate={setActivePostRevealIndex}
+        />
       )}
     </div>
   );

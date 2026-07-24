@@ -353,6 +353,25 @@ export default function QuizClient() {
         </section>
       )}
 
+      {/* SEE IT FOR YOURSELF — promo video */}
+      {journeyStage === 'reveal' && (
+        <section className="section section-video">
+          <div className="section-header">
+            <span className="section-label" style={{ color: 'var(--blue)' }}>See It For Yourself</span>
+            <h2 style={{ color: 'var(--white)' }}>What you just experienced, taken further</h2>
+          </div>
+          <div className="video-embed-wrap">
+            <iframe
+              src="https://player.vimeo.com/video/1207793504?h=49d7baa53a&badge=0&autopause=0&player_id=0&app_id=58479"
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+              allowFullScreen
+              title="Working Voices deepfake demonstration"
+            ></iframe>
+          </div>
+        </section>
+      )}
+
       {/* 07 THE CASE AGAINST E-LEARNING */}
       {journeyStage === 'reveal' && (
         <section className="section">

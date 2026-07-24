@@ -35,9 +35,10 @@ const POOLS = {
   },
 };
 
-const ROUND_ORDER = ['audio', 'video']; // voice first, then video
+const ROUND_ORDER = ['audio', 'video', 'video']; // voice first, then two video rounds
 const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
+const GAP_MS = 1500; // pause between clips within a round
 const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
 
 function shuffled(arr) {
@@ -49,17 +50,26 @@ function shuffled(arr) {
   return copy;
 }
 
-function drawRandomRound(type) {
-  const pool = POOLS[type];
-  const real = pool.reals[Math.floor(Math.random() * pool.reals.length)];
-  const fakes = shuffled(pool.fakes).slice(0, Math.min(FAKES_PER_ROUND, pool.fakes.length));
-  return { real, fakes };
-}
-
 function buildStages() {
-  return ROUND_ORDER.filter((type) => POOLS[type].reals.length > 0).map((type, i) => {
+  const activeTypes = ROUND_ORDER.filter((type) => POOLS[type].reals.length > 0);
+
+  // Draw distinct real clips across rounds of the same type (e.g. the two
+  // video rounds), so the same real clip doesn't show up twice in one visit.
+  const realsByType = {};
+  for (const type of new Set(activeTypes)) {
+    const countNeeded = activeTypes.filter((t) => t === type).length;
+    realsByType[type] = shuffled(POOLS[type].reals).slice(0, countNeeded);
+  }
+  const usedCount = {};
+
+  return activeTypes.map((type, i) => {
+    const pool = POOLS[type];
+    const drawIndex = usedCount[type] || 0;
+    usedCount[type] = drawIndex + 1;
+    const real = realsByType[type][drawIndex % realsByType[type].length];
+    const fakes = shuffled(pool.fakes).slice(0, Math.min(FAKES_PER_ROUND, pool.fakes.length));
     const id = `${type}-${i}`;
-    return { key: id, type, round: { id, ...drawRandomRound(type) } };
+    return { key: id, type, round: { id, real, fakes } };
   });
 }
 
@@ -70,11 +80,12 @@ function shuffledOptions(round) {
 
 function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [options] = useState(() => shuffledOptions(round));
-  const [stage, setStage] = useState('idle'); // 'idle' | number | 'choosing'
+  const [stage, setStage] = useState('idle'); // 'idle' | number | 'gap' | 'choosing'
   const [secondsLeft, setSecondsLeft] = useState(DECISION_SECONDS);
   const mediaRef = useRef(null);
   const answeredRef = useRef(false);
   const intervalRef = useRef(null);
+  const nextIndexRef = useRef(0);
 
   useEffect(() => {
     const el = mediaRef.current;
@@ -83,6 +94,14 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     el.load();
     el.play().catch(() => {});
   }, [stage, options]);
+
+  // Brief pause between clips so they don't blend together, and so the
+  // "Clip X of Y" counter has a clear moment to be seen.
+  useEffect(() => {
+    if (stage !== 'gap') return undefined;
+    const t = setTimeout(() => setStage(nextIndexRef.current), GAP_MS);
+    return () => clearTimeout(t);
+  }, [stage]);
 
   useEffect(() => {
     if (stage !== 'choosing') return undefined;
@@ -103,7 +122,15 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   }, [secondsLeft, stage, onTimeout]);
 
   function handleEnded() {
-    setStage((s) => (typeof s === 'number' && s + 1 < options.length ? s + 1 : 'choosing'));
+    setStage((s) => {
+      if (typeof s !== 'number') return s;
+      const next = s + 1;
+      if (next < options.length) {
+        nextIndexRef.current = next;
+        return 'gap';
+      }
+      return 'choosing';
+    });
   }
 
   function handleChoice(kind) {
@@ -134,8 +161,13 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
           />
         )}
         {typeof stage === 'number' && (
-          <div className="ty-now-playing">
-            Playing {stage + 1} of {options.length}…
+          <div className="ty-clip-counter">
+            Clip {stage + 1} of {options.length}
+          </div>
+        )}
+        {stage === 'gap' && (
+          <div className="ty-clip-counter ty-clip-counter-next">
+            Next: Clip {nextIndexRef.current + 1} of {options.length}
           </div>
         )}
       </div>
@@ -312,7 +344,7 @@ export default function QuizClient() {
         <section className="section section-gray">
           <div className="section-header">
             <span className="section-label">The Big Mistake</span>
-            <h2>Everyone treats this as a cyber problem. It's not, it's psychological.</h2>
+            <h2>Everyone treats this as a cyber problem — it's not, it's psychological.</h2>
             <p>
               Around 68% of breaches involve a human being, not a breached firewall. This is
               a human problem, that needs a human solution.
@@ -337,6 +369,11 @@ export default function QuizClient() {
               in.
             </p>
           </div>
+          <img
+            className="ty-elearning-image"
+            src="https://images.unsplash.com/photo-1713947503867-3b27964f042b?w=1200&q=80&fit=crop"
+            alt="A bored employee slumped over their laptop at their desk"
+          />
         </section>
       )}
 

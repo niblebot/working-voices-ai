@@ -74,18 +74,28 @@
   font-size: 12px;
 }
 
-.ty-now-playing {
+.ty-clip-counter {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  font-size: 11px;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 10px;
-  border-radius: 6px;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 8px 20px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.ty-clip-counter-next {
+  position: static;
+  transform: none;
+  background: var(--blue);
+  font-size: 17px;
+  padding: 14px 24px;
 }
 
 .ty-timer-row {
@@ -195,4 +205,14 @@
   color: var(--white);
   margin-top: 16px;
   font-size: 14px;
+}
+
+.ty-elearning-image {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 16px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }

@@ -378,6 +378,23 @@
   color: var(--white);
 }
 
+/* PRE-CLIP COUNTDOWN — reuses the timer-row/ring layout for the "get
+   ready" beat shown before every clip, including the first. */
+.ty-preclip-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ty-preclip-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .ty-ring-box {
   position: relative;
   width: 128px;
@@ -475,6 +492,52 @@
 @media (prefers-reduced-motion: reduce) {
   .ty-result-banner { animation: none; }
   .ty-tracker-pill, .ty-cta-btn, .ty-play-btn, .ty-pick-btn { transition: none; }
+}
+
+/* Per-round recap — the score alone never explained which clip was real. */
+.ty-recap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto 32px;
+  text-align: left;
+}
+
+.ty-recap-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.ty-recap-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ty-recap-row.correct .ty-recap-icon {
+  background: var(--yellow);
+  color: var(--navy);
+}
+
+.ty-recap-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  padding-top: 2px;
 }
 
 /* TIMED OUT */
@@ -678,11 +741,13 @@
   }
 
   .ty-timer-row,
+  .ty-preclip-countdown,
   .ty-locked-choices {
     padding: 0 20px;
   }
 
-  .ty-locked-choices {
+  .ty-locked-choices,
+  .ty-preclip-countdown {
     padding-bottom: 18px;
   }
 

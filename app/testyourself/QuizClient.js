@@ -38,7 +38,7 @@ const POOLS = {
 const ROUND_ORDER = ['audio', 'video', 'video']; // voice first, then two video rounds
 const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
-const GAP_MS = 1500; // pause between clips within a round
+const PRE_CLIP_SECONDS = 3; // "get ready" beat shown before every clip, including the first
 const OPTION_LABELS = ['First', 'Second', 'Third', 'Fourth'];
 const RING_RADIUS = 54;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -121,7 +121,10 @@ function buildStages() {
     const real = realsByType[type][drawIndex % realsByType[type].length];
     const fakes = shuffled(pool.fakes).slice(0, Math.min(FAKES_PER_ROUND, pool.fakes.length));
     const id = `${type}-${i}`;
-    return { key: id, type, round: { id, real, fakes } };
+    // Position among rounds of the same type (0 = first video round, 1 =
+    // second, etc.) so the copy can make clear a repeat-looking round is
+    // actually new, instead of every video round reading identically.
+    return { key: id, type, round: { id, real, fakes }, orderWithinType: drawIndex };
   });
 }
 
@@ -142,15 +145,15 @@ function RoundTracker({ total, current }) {
   );
 }
 
-function CountdownRing({ secondsLeft }) {
-  const frac = Math.max(0, secondsLeft) / DECISION_SECONDS;
+function CountdownRing({ secondsLeft, total = DECISION_SECONDS, urgent = true }) {
+  const frac = Math.max(0, secondsLeft) / total;
   const offset = RING_CIRCUMFERENCE * (1 - frac);
   return (
     <div className="ty-ring-box">
       <svg width="128" height="128" viewBox="0 0 128 128">
         <circle className="ty-ring-track" cx="64" cy="64" r={RING_RADIUS} />
         <circle
-          className={'ty-ring-fill' + (secondsLeft <= 2 ? ' urgent' : '')}
+          className={'ty-ring-fill' + (urgent && secondsLeft <= 2 ? ' urgent' : '')}
           cx="64"
           cy="64"
           r={RING_RADIUS}
@@ -164,11 +167,13 @@ function CountdownRing({ secondsLeft }) {
 
 function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [options] = useState(() => shuffledOptions(round));
-  const [stage, setStage] = useState('idle'); // 'idle' | number | 'gap' | 'choosing'
+  const [stage, setStage] = useState('idle'); // 'idle' | 'countdown' | number | 'choosing'
   const [secondsLeft, setSecondsLeft] = useState(DECISION_SECONDS);
+  const [preClipSecondsLeft, setPreClipSecondsLeft] = useState(PRE_CLIP_SECONDS);
   const mediaRefs = useRef([]);
   const answeredRef = useRef(false);
   const intervalRef = useRef(null);
+  const preClipIntervalRef = useRef(null);
   const nextIndexRef = useRef(0);
   const choicesRef = useRef(null);
 
@@ -188,13 +193,25 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     scrollToRef(choicesRef, { block: 'center' });
   }, [stage]);
 
-  // Brief pause between clips so they don't blend together, and so the
-  // "Clip X of Y" counter has a clear moment to be seen.
+  // A "get ready" beat before every clip (including the first) — clips
+  // starting with no warning was disorienting. Smooth 100ms ticks, same
+  // technique as the decision timer below, so the ring drains fluidly
+  // instead of jumping between whole seconds.
   useEffect(() => {
-    if (stage !== 'gap') return undefined;
-    const t = setTimeout(() => setStage(nextIndexRef.current), GAP_MS);
-    return () => clearTimeout(t);
+    if (stage !== 'countdown') return undefined;
+    setPreClipSecondsLeft(PRE_CLIP_SECONDS);
+    const start = Date.now();
+    preClipIntervalRef.current = setInterval(() => {
+      setPreClipSecondsLeft(Math.max(0, PRE_CLIP_SECONDS - (Date.now() - start) / 1000));
+    }, 100);
+    return () => clearInterval(preClipIntervalRef.current);
   }, [stage]);
+
+  useEffect(() => {
+    if (stage !== 'countdown' || preClipSecondsLeft > 0) return;
+    clearInterval(preClipIntervalRef.current);
+    setStage(nextIndexRef.current);
+  }, [stage, preClipSecondsLeft]);
 
   // Ticks every 100ms (not 1s) so the countdown ring drains smoothly.
   useEffect(() => {
@@ -222,30 +239,27 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
       const next = s + 1;
       if (next < options.length) {
         nextIndexRef.current = next;
-        return 'gap';
+        return 'countdown';
       }
       return 'choosing';
     });
   }
 
-  function handleChoice(kind) {
+  function handleChoice(kind, index) {
     if (answeredRef.current) return;
     answeredRef.current = true;
     clearInterval(intervalRef.current);
-    onComplete(kind === 'real');
+    const realIndex = options.findIndex((o) => o.kind === 'real');
+    onComplete({ correct: kind === 'real', pickedIndex: index, realIndex });
   }
 
-  // The Play tap is the one real user gesture we get for the whole round.
-  // Clip 0 plays for real here; every other clip gets a muted play+pause
-  // "touch" so mobile browsers treat it as already-unlocked when its turn
-  // comes later via onEnded, with no gesture behind it at that point.
+  // The Play tap is the one real user gesture we get for the whole round —
+  // every clip gets a muted play+pause "touch" here so mobile browsers
+  // treat all of them as already-unlocked, since real playback for clip 0
+  // now only starts after the "get ready" countdown, not inside this tap.
   function handleStart() {
-    mediaRefs.current.forEach((el, i) => {
+    mediaRefs.current.forEach((el) => {
       if (!el) return;
-      if (i === 0) {
-        el.play().catch(() => {});
-        return;
-      }
       el.muted = true;
       el.play()
         .then(() => {
@@ -255,7 +269,8 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
         })
         .catch(() => {});
     });
-    setStage(0);
+    nextIndexRef.current = 0;
+    setStage('countdown');
   }
 
   const MediaTag = type === 'video' ? 'video' : 'audio';
@@ -289,12 +304,16 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
             Clip {stage + 1} of {options.length}
           </div>
         )}
-        {stage === 'gap' && (
-          <div className="ty-clip-counter ty-clip-counter-next">
-            Next: Clip {nextIndexRef.current + 1} of {options.length}
-          </div>
-        )}
       </div>
+
+      {stage === 'countdown' && (
+        <div className="ty-preclip-countdown">
+          <CountdownRing secondsLeft={preClipSecondsLeft} total={PRE_CLIP_SECONDS} urgent={false} />
+          <p className="ty-preclip-label">
+            {nextIndexRef.current === 0 ? 'Get ready' : `Clip ${nextIndexRef.current + 1} of ${options.length}`}
+          </p>
+        </div>
+      )}
 
       {stage === 'choosing' && (
         <>
@@ -308,7 +327,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
             style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}
           >
             {options.map((opt, i) => (
-              <button key={i} type="button" className="ty-pick-btn" onClick={() => handleChoice(opt.kind)}>
+              <button key={i} type="button" className="ty-pick-btn" onClick={() => handleChoice(opt.kind, i)}>
                 {OPTION_LABELS[i] ?? `Option ${i + 1}`}
               </button>
             ))}
@@ -326,6 +345,10 @@ export default function QuizClient() {
   const [results, setResults] = useState([]);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
+  // Which round index timed out, so "try again" can re-enter just that
+  // round instead of refreshing the page and losing every round already
+  // completed — refreshing used to be the only option and wiped everything.
+  const [timedOutAtIndex, setTimedOutAtIndex] = useState(null);
   const activeSectionRef = useRef(null);
 
   // Each journey stage (a round, timed-out, reveal) swaps in below whatever
@@ -384,16 +407,21 @@ export default function QuizClient() {
     }).catch(() => {});
   }
 
-  function handleStageComplete(correct) {
+  function handleStageComplete({ correct, pickedIndex, realIndex }) {
     logAttempt(correct);
-    setResults((prev) => [...prev, correct]);
+    setResults((prev) => [...prev, { type: stages[journeyStage].type, correct, pickedIndex, realIndex }]);
     const next = journeyStage + 1;
     setJourneyStage(next < stages.length ? next : 'reveal');
   }
 
   function handleStageTimeout() {
     logAttempt(false);
+    setTimedOutAtIndex(journeyStage);
     setJourneyStage('timedout');
+  }
+
+  function handleRetryRound() {
+    setJourneyStage(timedOutAtIndex);
   }
 
   async function handleLeadSubmit(e) {
@@ -411,7 +439,7 @@ export default function QuizClient() {
     }
   }
 
-  const correctCount = results.filter(Boolean).length;
+  const correctCount = results.filter((r) => r.correct).length;
   const totalRounds = stages.length;
   const activeStage = typeof journeyStage === 'number' ? stages[journeyStage] : null;
 
@@ -467,12 +495,16 @@ export default function QuizClient() {
             <h2 style={{ marginTop: 20 }}>
               {activeStage.type === 'audio'
                 ? 'Real voice, or clone?'
-                : 'Now watch closely. Which one is real?'}
+                : activeStage.orderWithinType === 0
+                ? 'Now watch closely. Which one is real?'
+                : 'One more — a different person this time.'}
             </h2>
             <p>
               {activeStage.type === 'audio'
                 ? `You'll hear ${activeStage.round.fakes.length + 1} short voice clips of the same person. One is real. You have five seconds to choose.`
-                : `Watch ${activeStage.round.fakes.length + 1} video clips. One is the real person. Five seconds. Choose fast.`}
+                : activeStage.orderWithinType === 0
+                ? `Watch ${activeStage.round.fakes.length + 1} video clips. One is the real person. Five seconds. Choose fast.`
+                : `Same rules, a new set of clips. ${activeStage.round.fakes.length + 1} videos, one real person. Five seconds.`}
             </p>
           </div>
           <TimedRoundPlayer
@@ -497,7 +529,9 @@ export default function QuizClient() {
               That's not bad luck — hesitation is exactly how these attacks work. A real
               scammer doesn't wait for you to think it over.
             </p>
-            <p>Refresh the page to try again.</p>
+            <button type="button" className="ty-cta-btn" onClick={handleRetryRound}>
+              Try this round again
+            </button>
           </div>
         </section>
       )}
@@ -524,6 +558,19 @@ export default function QuizClient() {
             <h2>So, how did you do?</h2>
             <div className="ty-result-banner">
               {correctCount} / {totalRounds}
+            </div>
+            <div className="ty-recap-list">
+              {results.map((r, i) => (
+                <div key={i} className={'ty-recap-row' + (r.correct ? ' correct' : '')}>
+                  <span className="ty-recap-icon">{r.correct ? '✓' : '✕'}</span>
+                  <span className="ty-recap-text">
+                    Round {i + 1} ({r.type === 'audio' ? 'Voice' : 'Video'}) —{' '}
+                    {r.correct
+                      ? 'you spotted the real one.'
+                      : `you picked ${OPTION_LABELS[r.pickedIndex]}. The real one was ${OPTION_LABELS[r.realIndex]}.`}
+                  </span>
+                </div>
+              ))}
             </div>
             <p>
               Getting it wrong means your brain did exactly what it's built to do, which is

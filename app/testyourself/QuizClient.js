@@ -197,21 +197,29 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // starting with no warning was disorienting. Smooth 100ms ticks, same
   // technique as the decision timer below, so the ring drains fluidly
   // instead of jumping between whole seconds.
+  //
+  // This stage is re-entered before every clip (unlike 'choosing', which
+  // only happens once per round), which used to expose a race: advancing
+  // was decided by a *second* effect reading preClipSecondsLeft, but that
+  // state was still sitting at the previous cycle's 0 in the same render
+  // where stage flips back to 'countdown' — so it could advance before
+  // the reset to PRE_CLIP_SECONDS ever landed, skipping the countdown
+  // for that clip. Deciding "done" inside the same interval callback that
+  // owns the countdown avoids ever reading stale state from last time.
   useEffect(() => {
     if (stage !== 'countdown') return undefined;
     setPreClipSecondsLeft(PRE_CLIP_SECONDS);
     const start = Date.now();
     preClipIntervalRef.current = setInterval(() => {
-      setPreClipSecondsLeft(Math.max(0, PRE_CLIP_SECONDS - (Date.now() - start) / 1000));
+      const remaining = Math.max(0, PRE_CLIP_SECONDS - (Date.now() - start) / 1000);
+      setPreClipSecondsLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(preClipIntervalRef.current);
+        setStage(nextIndexRef.current);
+      }
     }, 100);
     return () => clearInterval(preClipIntervalRef.current);
   }, [stage]);
-
-  useEffect(() => {
-    if (stage !== 'countdown' || preClipSecondsLeft > 0) return;
-    clearInterval(preClipIntervalRef.current);
-    setStage(nextIndexRef.current);
-  }, [stage, preClipSecondsLeft]);
 
   // Ticks every 100ms (not 1s) so the countdown ring drains smoothly.
   useEffect(() => {

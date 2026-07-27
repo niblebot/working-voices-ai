@@ -265,17 +265,21 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // every clip gets a muted play+pause "touch" here so mobile browsers
   // treat all of them as already-unlocked, since real playback for clip 0
   // now only starts after the "get ready" countdown, not inside this tap.
+  //
+  // Pausing has to happen synchronously, not inside the play() promise's
+  // .then() — waiting for the browser to confirm playback actually started
+  // left a window where more than one clip could be genuinely mid-playback
+  // at once (briefly, but noticeably, like two things playing together).
+  // pause() right after play() is safe even before that promise settles.
   function handleStart() {
     mediaRefs.current.forEach((el) => {
       if (!el) return;
       el.muted = true;
-      el.play()
-        .then(() => {
-          el.pause();
-          el.currentTime = 0;
-          el.muted = false;
-        })
-        .catch(() => {});
+      const playPromise = el.play();
+      el.pause();
+      el.currentTime = 0;
+      el.muted = false;
+      playPromise?.catch(() => {});
     });
     nextIndexRef.current = 0;
     setStage('countdown');
@@ -359,13 +363,25 @@ export default function QuizClient() {
   const [timedOutAtIndex, setTimedOutAtIndex] = useState(null);
   const [timedOutRealIndex, setTimedOutRealIndex] = useState(null);
   const activeSectionRef = useRef(null);
+  const roundPlayerRef = useRef(null);
 
   // Each journey stage (a round, timed-out, reveal) swaps in below whatever
   // the user was already looking at, so without this the page just sits
   // still and it looks like the button/choice did nothing.
+  //
+  // Rounds specifically scroll to the player itself, not the section: on
+  // shorter screens the round's own heading/tracker/paragraph are tall
+  // enough that aligning the section's top edge to the viewport top left
+  // the actual video player (further down, after all that text) below the
+  // fold — the opposite of "did nothing", but still meant scrolling
+  // further to reach the one interactive part.
   useEffect(() => {
     if (journeyStage === 'hook') return;
-    scrollToRef(activeSectionRef, { block: 'start' });
+    if (typeof journeyStage === 'number') {
+      scrollToRef(roundPlayerRef, { block: 'center' });
+    } else {
+      scrollToRef(activeSectionRef, { block: 'start' });
+    }
   }, [journeyStage]);
 
   // Post-reveal sections (Reveal, Big Mistake, Video, E-learning, Demo) get
@@ -490,8 +506,8 @@ export default function QuizClient() {
           <p>Perhaps you believe you'd always spot a deepfake. Almost everyone thinks&nbsp;that.</p>
           <p>
             You're about to test that claim. Your job is to correctly identify the real
-            person from three choices. You'll only have seconds to decide, and no chance to
-            go back. Exactly like in real{' '}life.
+            person from three choices. You'll only have seconds to decide. Exactly like in
+            real life.
           </p>
           {journeyStage === 'hook' && (
             <button
@@ -516,6 +532,9 @@ export default function QuizClient() {
             <span className="ty-tracker-label">
               Round {journeyStage + 1} of {totalRounds} · {activeStage.type === 'audio' ? 'Voice' : 'Video'}
             </span>
+            {activeStage.type === 'video' && activeStage.orderWithinType === 0 && (
+              <p className="ty-round-transition">Now let's test your visual skills.</p>
+            )}
             <h2 style={{ marginTop: 20 }}>
               {activeStage.type === 'audio'
                 ? 'Real voice, or clone?'
@@ -531,13 +550,15 @@ export default function QuizClient() {
                 : `Same rules, a new set of clips. ${activeStage.round.fakes.length + 1} videos, one real person. Five seconds.`}
             </p>
           </div>
-          <TimedRoundPlayer
-            key={activeStage.round.id}
-            round={activeStage.round}
-            type={activeStage.type}
-            onComplete={handleStageComplete}
-            onTimeout={handleStageTimeout}
-          />
+          <div ref={roundPlayerRef}>
+            <TimedRoundPlayer
+              key={activeStage.round.id}
+              round={activeStage.round}
+              type={activeStage.type}
+              onComplete={handleStageComplete}
+              onTimeout={handleStageTimeout}
+            />
+          </div>
         </section>
       )}
 
@@ -551,7 +572,7 @@ export default function QuizClient() {
             <h2>Time's up.</h2>
             <p>
               That's not bad luck — hesitation is exactly how these attacks work. A real
-              scammer doesn't wait for you to think it over.
+              criminal doesn't wait for you to think it over.
             </p>
             <button type="button" className="ty-cta-btn" onClick={handleRetryRound}>
               Try this round again
@@ -610,13 +631,13 @@ export default function QuizClient() {
             ) : (
               <p>
                 Getting it wrong means your brain did exactly what it's built to do, which is
-                to trust a calm and confident request. That is the instinct scammers are
+                to trust a calm and confident request. That is the instinct criminals are
                 exploiting.
               </p>
             )}
             <p>
               Even if your organisation has the best firewall money can buy, it will not
-              protect you. Hackers instead will use social engineering (hacking your
+              protect you. Criminals instead will use social engineering (hacking your
               employee's psychology).
             </p>
           </div>
@@ -638,21 +659,36 @@ export default function QuizClient() {
         </section>
       )}
 
-      {/* SEE IT FOR YOURSELF — promo video */}
+      {/* SEE IT FOR YOURSELF — Andy & Nick tips, placeholders until recorded */}
       {journeyStage === 'reveal' && (
-        <section ref={videoSectionRef} className="section section-video">
+        <section ref={videoSectionRef} className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
           <div className="section-header">
-            <span className="section-label" style={{ color: 'var(--blue)' }}>See It For Yourself</span>
-            <h2 style={{ color: 'var(--white)' }}>What you just experienced, taken further</h2>
+            <span className="section-label">See It For Yourself</span>
+            <h2>A quick word from the team</h2>
+            <p>A couple of tips from Nick and Andy before you book your demo.</p>
           </div>
-          <div className="video-embed-wrap">
-            <iframe
-              src="https://player.vimeo.com/video/1207793504?h=49d7baa53a&badge=0&autopause=0&player_id=0&app_id=58479"
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-              allowFullScreen
-              title="Working Voices deepfake demonstration"
-            ></iframe>
+          <div className="ty-trainer-grid">
+            <div className="ty-trainer-card">
+              <div className="ty-trainer-placeholder">
+                <span className="ty-trainer-play-icon">▶</span>
+                <span className="ty-trainer-soon">Video coming soon</span>
+              </div>
+              <div className="ty-trainer-caption">
+                <strong>Nick Smallman</strong>
+                <span>CEO</span>
+              </div>
+            </div>
+            <div className="ty-trainer-card">
+              <div className="ty-trainer-placeholder">
+                <span className="ty-trainer-play-icon">▶</span>
+                <span className="ty-trainer-soon">Video coming soon</span>
+              </div>
+              <div className="ty-trainer-caption">
+                <strong>Andy Day</strong>
+                <span>Lead Trainer</span>
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -665,19 +701,20 @@ export default function QuizClient() {
             <span className="section-label">The Case Against E-Learning</span>
             <h2>Why a training video is ineffective</h2>
             <p>
-              eLearning can inform but struggles to change behaviours. Only 1 in 5 people
-              finish the average online course, and according to the{' '}
+              eLearning is great for building awareness but long eLearning courses are where
+              it falls down. Only 1 in 5 people finish the average online course, and
+              according to the{' '}
               <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4492928/" target="_blank" rel="noopener noreferrer">
                 Ebbinghaus forgetting curve
-              </a>{' '}
-              up to 90% of what they learn is forgotten within a week. That's where we come
-              in.
+              </a>
+              , up to 90% of what they do learn is forgotten within a week. That's where we
+              come in.
             </p>
           </div>
           <img
             className="ty-elearning-image"
-            src="https://images.unsplash.com/photo-1713947503867-3b27964f042b?w=1200&q=80&fit=crop"
-            alt="A bored employee slumped over their laptop at their desk"
+            src="https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=1200&q=80&fit=crop"
+            alt="An empty laptop left open and unattended on a desk"
           />
         </section>
       )}

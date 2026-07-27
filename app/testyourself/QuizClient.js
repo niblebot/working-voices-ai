@@ -238,8 +238,8 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     if (stage !== 'choosing' || secondsLeft > 0 || answeredRef.current) return;
     answeredRef.current = true;
     clearInterval(intervalRef.current);
-    onTimeout();
-  }, [secondsLeft, stage, onTimeout]);
+    onTimeout(options.findIndex((o) => o.kind === 'real'));
+  }, [secondsLeft, stage, onTimeout, options]);
 
   function handleEnded() {
     setStage((s) => {
@@ -357,6 +357,7 @@ export default function QuizClient() {
   // round instead of refreshing the page and losing every round already
   // completed — refreshing used to be the only option and wiped everything.
   const [timedOutAtIndex, setTimedOutAtIndex] = useState(null);
+  const [timedOutRealIndex, setTimedOutRealIndex] = useState(null);
   const activeSectionRef = useRef(null);
 
   // Each journey stage (a round, timed-out, reveal) swaps in below whatever
@@ -415,21 +416,36 @@ export default function QuizClient() {
     }).catch(() => {});
   }
 
-  function handleStageComplete({ correct, pickedIndex, realIndex }) {
-    logAttempt(correct);
-    setResults((prev) => [...prev, { type: stages[journeyStage].type, correct, pickedIndex, realIndex }]);
-    const next = journeyStage + 1;
+  function advanceFrom(index) {
+    const next = index + 1;
     setJourneyStage(next < stages.length ? next : 'reveal');
   }
 
-  function handleStageTimeout() {
+  function handleStageComplete({ correct, pickedIndex, realIndex }) {
+    logAttempt(correct);
+    setResults((prev) => [...prev, { type: stages[journeyStage].type, correct, pickedIndex, realIndex }]);
+    advanceFrom(journeyStage);
+  }
+
+  function handleStageTimeout(realIndex) {
     logAttempt(false);
     setTimedOutAtIndex(journeyStage);
+    setTimedOutRealIndex(realIndex);
     setJourneyStage('timedout');
   }
 
   function handleRetryRound() {
     setJourneyStage(timedOutAtIndex);
+  }
+
+  // Already logged as incorrect the moment it timed out — this just
+  // records the round's result so the recap can explain it, and moves on.
+  function handleContinueAfterTimeout() {
+    setResults((prev) => [
+      ...prev,
+      { type: stages[timedOutAtIndex].type, correct: false, pickedIndex: null, realIndex: timedOutRealIndex },
+    ]);
+    advanceFrom(timedOutAtIndex);
   }
 
   async function handleLeadSubmit(e) {
@@ -525,7 +541,7 @@ export default function QuizClient() {
         </section>
       )}
 
-      {/* TIMED OUT — dead stop, no continuing */}
+      {/* TIMED OUT */}
       {journeyStage === 'timedout' && (
         <section ref={activeSectionRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
@@ -539,6 +555,9 @@ export default function QuizClient() {
             </p>
             <button type="button" className="ty-cta-btn" onClick={handleRetryRound}>
               Try this round again
+            </button>
+            <button type="button" className="ty-secondary-btn" onClick={handleContinueAfterTimeout}>
+              Continue anyway (counts as incorrect)
             </button>
           </div>
         </section>
@@ -575,16 +594,26 @@ export default function QuizClient() {
                     Round {i + 1} ({r.type === 'audio' ? 'Voice' : 'Video'}) —{' '}
                     {r.correct
                       ? 'you spotted the real one.'
+                      : r.pickedIndex === null
+                      ? `you ran out of time. The real one was ${OPTION_LABELS[r.realIndex]}.`
                       : `you picked ${OPTION_LABELS[r.pickedIndex]}. The real one was ${OPTION_LABELS[r.realIndex]}.`}
                   </span>
                 </div>
               ))}
             </div>
-            <p>
-              Getting it wrong means your brain did exactly what it's built to do, which is
-              to trust a calm and confident request. That is the instinct scammers are
-              exploiting.
-            </p>
+            {correctCount === totalRounds ? (
+              <p>
+                Perfect score — good instincts. But don't get comfortable: that was a tiny
+                sample, and in the real world the odds don't always favour you. It only
+                takes one moment of misplaced trust.
+              </p>
+            ) : (
+              <p>
+                Getting it wrong means your brain did exactly what it's built to do, which is
+                to trust a calm and confident request. That is the instinct scammers are
+                exploiting.
+              </p>
+            )}
             <p>
               Even if your organisation has the best firewall money can buy, it will not
               protect you. Hackers instead will use social engineering (hacking your

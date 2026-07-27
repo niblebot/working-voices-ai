@@ -222,6 +222,26 @@
   cursor: default;
 }
 
+/* Secondary, quieter than the CTA — an escape hatch, not the encouraged path */
+.ty-secondary-btn {
+  display: block;
+  margin: 14px auto 0;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: 'Red Hat Display', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ty-secondary-btn:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 @media (max-width: 860px) {
   .ty-hook-hero {
     min-height: 520px;

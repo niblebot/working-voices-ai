@@ -353,7 +353,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
 export default function QuizClient() {
   // Drawn once per page load, so the exact clip set changes on every refresh.
   const [stages] = useState(buildStages);
-  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into stages | 'reveal' | 'timedout'
+  const [journeyStage, setJourneyStage] = useState('hook'); // 'hook' | index into stages | 'transition' | 'reveal' | 'timedout'
   const [results, setResults] = useState([]);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadStatus, setLeadStatus] = useState('idle');
@@ -362,6 +362,9 @@ export default function QuizClient() {
   // completed — refreshing used to be the only option and wiped everything.
   const [timedOutAtIndex, setTimedOutAtIndex] = useState(null);
   const [timedOutRealIndex, setTimedOutRealIndex] = useState(null);
+  // Which round is coming up after the brief "transition" interstitial —
+  // needed since the interstitial isn't itself a round index.
+  const [pendingRoundIndex, setPendingRoundIndex] = useState(null);
   const activeSectionRef = useRef(null);
   const roundPlayerRef = useRef(null);
 
@@ -418,6 +421,14 @@ export default function QuizClient() {
     return () => observer.disconnect();
   }, [journeyStage]);
 
+  // Brief pause on the transition interstitial before moving into the
+  // round it was leading into.
+  useEffect(() => {
+    if (journeyStage !== 'transition') return undefined;
+    const t = setTimeout(() => setJourneyStage(pendingRoundIndex), 2200);
+    return () => clearTimeout(t);
+  }, [journeyStage, pendingRoundIndex]);
+
   function handleStart() {
     setJourneyStage(stages.length > 0 ? 0 : 'reveal');
   }
@@ -434,7 +445,21 @@ export default function QuizClient() {
 
   function advanceFrom(index) {
     const next = index + 1;
-    setJourneyStage(next < stages.length ? next : 'reveal');
+    if (next >= stages.length) {
+      setJourneyStage('reveal');
+      return;
+    }
+    // The one moment that needs its own beat: leaving the voice round for
+    // the first video round. Later round-to-round moves (both video) keep
+    // going straight through — they already have their own distinguishing
+    // copy on the round screen itself.
+    const nextStage = stages[next];
+    if (nextStage.type === 'video' && nextStage.orderWithinType === 0) {
+      setPendingRoundIndex(next);
+      setJourneyStage('transition');
+      return;
+    }
+    setJourneyStage(next);
   }
 
   function handleStageComplete({ correct, pickedIndex, realIndex }) {
@@ -532,9 +557,6 @@ export default function QuizClient() {
             <span className="ty-tracker-label">
               Round {journeyStage + 1} of {totalRounds} · {activeStage.type === 'audio' ? 'Voice' : 'Video'}
             </span>
-            {activeStage.type === 'video' && activeStage.orderWithinType === 0 && (
-              <p className="ty-round-transition">Now let's test your visual skills.</p>
-            )}
             <h2 style={{ marginTop: 20 }}>
               {activeStage.type === 'audio'
                 ? 'Real voice, or clone?'
@@ -558,6 +580,19 @@ export default function QuizClient() {
               onComplete={handleStageComplete}
               onTimeout={handleStageTimeout}
             />
+          </div>
+        </section>
+      )}
+
+      {/* TRANSITION — a brief beat before the first video round, so it
+          doesn't read as a sudden, unexplained repeat of the voice round */}
+      {journeyStage === 'transition' && (
+        <section ref={activeSectionRef} className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
+          <div className="section-header">
+            <RoundTracker total={totalRounds} current={pendingRoundIndex} />
+            <span className="section-label">Next Up</span>
+            <h2>Now let's test your visual skills.</h2>
           </div>
         </section>
       )}
@@ -713,8 +748,8 @@ export default function QuizClient() {
           </div>
           <img
             className="ty-elearning-image"
-            src="https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=1200&q=80&fit=crop"
-            alt="An empty laptop left open and unattended on a desk"
+            src="/testyourself/elearning-disengaged.png"
+            alt="A tired, checked-out employee watching an online training video late in the evening"
           />
         </section>
       )}

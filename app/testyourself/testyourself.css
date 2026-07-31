@@ -300,13 +300,6 @@
   letter-spacing: 0.08em;
 }
 
-.ty-round-transition {
-  font-size: 17px;
-  font-style: italic;
-  color: var(--yellow);
-  margin-top: 18px;
-}
-
 /* PLAYER */
 .ty-locked-player {
   max-width: 780px;

@@ -176,6 +176,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const preClipIntervalRef = useRef(null);
   const nextIndexRef = useRef(0);
   const choicesRef = useRef(null);
+  const preclipRef = useRef(null);
 
   // Each clip after the first advances automatically (via onEnded), with no
   // user gesture of its own — mobile Safari silently refuses to play that,
@@ -191,6 +192,15 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   useEffect(() => {
     if (stage !== 'choosing') return;
     scrollToRef(choicesRef, { block: 'center' });
+  }, [stage]);
+
+  // The round only gets centered once, when it first appears — but the
+  // countdown ring is extra content that shows up later (once Play is
+  // tapped), taller than what was there when that first scroll happened.
+  // Without this, the ring can render below the fold, cut off.
+  useEffect(() => {
+    if (stage !== 'countdown') return;
+    scrollToRef(preclipRef, { block: 'center' });
   }, [stage]);
 
   // A "get ready" beat before every clip (including the first) — clips
@@ -266,20 +276,23 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // treat all of them as already-unlocked, since real playback for clip 0
   // now only starts after the "get ready" countdown, not inside this tap.
   //
-  // Pausing has to happen synchronously, not inside the play() promise's
-  // .then() — waiting for the browser to confirm playback actually started
-  // left a window where more than one clip could be genuinely mid-playback
-  // at once (briefly, but noticeably, like two things playing together).
-  // pause() right after play() is safe even before that promise settles.
+  // Pausing needs to wait for the play() promise to actually settle (or a
+  // short timeout, whichever comes first) rather than firing instantly —
+  // iOS Safari seems to need genuine confirmation that playback started
+  // before it'll trust a later, gesture-less play() call to include sound,
+  // which is what silently broke audio on mobile. Bounding it to 300ms
+  // keeps the earlier "two clips visibly overlapping" glitch from coming
+  // back, since every clip here is muted and hidden the whole time anyway.
   function handleStart() {
     mediaRefs.current.forEach((el) => {
       if (!el) return;
       el.muted = true;
-      const playPromise = el.play();
-      el.pause();
-      el.currentTime = 0;
-      el.muted = false;
-      playPromise?.catch(() => {});
+      const playPromise = Promise.resolve(el.play()).catch(() => {});
+      Promise.race([playPromise, new Promise((resolve) => setTimeout(resolve, 300))]).then(() => {
+        el.pause();
+        el.currentTime = 0;
+        el.muted = false;
+      });
     });
     nextIndexRef.current = 0;
     setStage('countdown');
@@ -319,7 +332,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
       </div>
 
       {stage === 'countdown' && (
-        <div className="ty-preclip-countdown">
+        <div ref={preclipRef} className="ty-preclip-countdown">
           <CountdownRing secondsLeft={preClipSecondsLeft} total={PRE_CLIP_SECONDS} urgent={false} />
           <p className="ty-preclip-label">
             {nextIndexRef.current === 0 ? 'Get ready' : `Clip ${nextIndexRef.current + 1} of ${options.length}`}

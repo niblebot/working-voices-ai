@@ -187,6 +187,18 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     mediaRefs.current[stage]?.play().catch(() => {});
   }, [stage]);
 
+  // Safety net: if a clip silently fails to play through to the end for any
+  // reason (a flaky network, a format hiccup on a particular device), it
+  // previously just sat there forever waiting for an "ended" event that was
+  // never coming — no error, just stuck, which looks exactly like a broken
+  // button even though nothing is actually disabled. This forces the round
+  // to move on regardless, well past what any real clip should ever take.
+  useEffect(() => {
+    if (typeof stage !== 'number') return undefined;
+    const t = setTimeout(() => handleEnded(), 20000);
+    return () => clearTimeout(t);
+  }, [stage]);
+
   // The clips can take the choice buttons out of view (especially after
   // scrolling away to watch), so bring them into view the moment they appear.
   useEffect(() => {
@@ -320,6 +332,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
             className={type === 'video' ? 'ty-media' : 'ty-media-audio'}
             style={{ display: stage === i ? undefined : 'none' }}
             onEnded={stage === i ? handleEnded : undefined}
+            onError={stage === i ? handleEnded : undefined}
             onContextMenu={(e) => e.preventDefault()}
             {...mediaProps}
           />

@@ -187,16 +187,29 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     mediaRefs.current[stage]?.play().catch(() => {});
   }, [stage]);
 
-  // Safety net: if a clip silently fails to play through to the end for any
-  // reason (a flaky network, a format hiccup on a particular device), it
-  // previously just sat there forever waiting for an "ended" event that was
-  // never coming — no error, just stuck, which looks exactly like a broken
-  // button even though nothing is actually disabled. This forces the round
-  // to move on regardless, well past what any real clip should ever take.
+  // Safety net for a clip that silently never fires "ended" — no error, just
+  // stuck, which looks exactly like a broken button even though nothing is
+  // actually disabled. A flat timeout here was wrong: the video clips are
+  // several MB each, and a slower connection can legitimately take a while
+  // to buffer through one without ever being genuinely stuck — a fixed
+  // deadline forced a premature advance mid-playback on real (if slow)
+  // clips. This instead tracks actual progress via "timeupdate" and only
+  // steps in if there's been zero progress for a stretch, i.e. truly
+  // stalled, not just slow.
   useEffect(() => {
     if (typeof stage !== 'number') return undefined;
-    const t = setTimeout(() => handleEnded(), 20000);
-    return () => clearTimeout(t);
+    const el = mediaRefs.current[stage];
+    if (!el) return undefined;
+    let stallTimer = setTimeout(() => handleEnded(), 8000);
+    function resetStallTimer() {
+      clearTimeout(stallTimer);
+      stallTimer = setTimeout(() => handleEnded(), 8000);
+    }
+    el.addEventListener('timeupdate', resetStallTimer);
+    return () => {
+      clearTimeout(stallTimer);
+      el.removeEventListener('timeupdate', resetStallTimer);
+    };
   }, [stage]);
 
   // The clips can take the choice buttons out of view (especially after

@@ -404,6 +404,10 @@ export default function QuizClient() {
   // Which round is coming up after the brief "transition" interstitial —
   // needed since the interstitial isn't itself a round index.
   const [pendingRoundIndex, setPendingRoundIndex] = useState(null);
+  // Live "X people have taken this, Y% ..." stats for the Reveal screen —
+  // null until the fetch resolves, at which point it's either not ready
+  // yet (too few real sessions logged) or has real numbers to show.
+  const [sessionStats, setSessionStats] = useState(null);
   const activeSectionRef = useRef(null);
   const roundPlayerRef = useRef(null);
 
@@ -461,12 +465,31 @@ export default function QuizClient() {
   }, [journeyStage]);
 
   // Brief pause on the transition interstitial before moving into the
-  // round it was leading into.
+  // round it was leading into. Long enough to actually read the line, not
+  // just flash past it.
   useEffect(() => {
     if (journeyStage !== 'transition') return undefined;
-    const t = setTimeout(() => setJourneyStage(pendingRoundIndex), 2200);
+    const t = setTimeout(() => setJourneyStage(pendingRoundIndex), 3500);
     return () => clearTimeout(t);
   }, [journeyStage, pendingRoundIndex]);
+
+  // Log this completed session once (not on every re-render while still on
+  // 'reveal'), then fetch the live aggregate for the "X people have taken
+  // this" copy — same "don't show a tiny, misleading sample" gate as the
+  // per-round stats already used elsewhere on the site.
+  useEffect(() => {
+    if (journeyStage !== 'reveal') return;
+    const finalCorrectCount = results.filter((r) => r.correct).length;
+    fetch('/api/quiz-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correctCount: finalCorrectCount, totalRounds: stages.length }),
+    }).catch(() => {});
+    fetch('/api/quiz-session')
+      .then((res) => res.json())
+      .then((data) => setSessionStats(data))
+      .catch(() => {});
+  }, [journeyStage]);
 
   function handleStart() {
     setJourneyStage(stages.length > 0 ? 0 : 'reveal');
@@ -546,6 +569,17 @@ export default function QuizClient() {
   const correctCount = results.filter((r) => r.correct).length;
   const totalRounds = stages.length;
   const activeStage = typeof journeyStage === 'number' ? stages[journeyStage] : null;
+  const isPerfectScore = correctCount === totalRounds;
+
+  // Live counter once there's a real sample to quote; otherwise the same
+  // static copy this page always had, rather than a misleadingly tiny stat.
+  const revealMessage = sessionStats?.ready
+    ? isPerfectScore
+      ? `${sessionStats.total} people have taken this test, and only ${sessionStats.perfectPct}% spotted every deepfake. That makes you rare, but it's also a game of chance, and luck can turn against you.`
+      : `${sessionStats.total} people have taken this test, and ${sessionStats.failPct}% failed to spot the deepfake. You're not alone.`
+    : isPerfectScore
+    ? "Perfect score — good instincts. But don't get comfortable: that was a tiny sample, and in the real world the odds don't always favour you. It only takes one moment of misplaced trust."
+    : 'Getting it wrong means your brain did exactly what it\'s built to do, which is to trust a calm and confident request. That is the instinct criminals are exploiting.';
 
   return (
     <div className="ty-page">
@@ -696,19 +730,7 @@ export default function QuizClient() {
                 </div>
               ))}
             </div>
-            {correctCount === totalRounds ? (
-              <p>
-                Perfect score — good instincts. But don't get comfortable: that was a tiny
-                sample, and in the real world the odds don't always favour you. It only
-                takes one moment of misplaced trust.
-              </p>
-            ) : (
-              <p>
-                Getting it wrong means your brain did exactly what it's built to do, which is
-                to trust a calm and confident request. That is the instinct criminals are
-                exploiting.
-              </p>
-            )}
+            <p>{revealMessage}</p>
             <p>
               Even if your organisation has the best firewall money can buy, it will not
               protect you. Criminals instead will use social engineering (hacking your

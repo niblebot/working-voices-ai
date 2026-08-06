@@ -768,7 +768,7 @@ export default function QuizClient() {
             <div className="ty-trainer-card">
               <div className="ty-trainer-video-wrap">
                 <iframe
-                  src="https://player.vimeo.com/video/1216126287?h=21c12aea35&badge=0&autopause=0&player_id=0&app_id=58479"
+                  src="https://player.vimeo.com/video/1216126287?h=21c12aea35&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
@@ -783,7 +783,7 @@ export default function QuizClient() {
             <div className="ty-trainer-card">
               <div className="ty-trainer-video-wrap">
                 <iframe
-                  src="https://player.vimeo.com/video/1216126286?h=88171588ba&badge=0&autopause=0&player_id=0&app_id=58479"
+                  src="https://player.vimeo.com/video/1216126286?h=88171588ba&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen

@@ -755,30 +755,40 @@ export default function QuizClient() {
         </section>
       )}
 
-      {/* SEE IT FOR YOURSELF — Andy & Nick tips, placeholders until recorded */}
+      {/* SEE IT FOR YOURSELF — Andy's tips; Nick's slot swaps in once recorded */}
       {journeyStage === 'reveal' && (
         <section ref={videoSectionRef} className="section section-dark ty-glow-section">
           <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">See It For Yourself</span>
             <h2>A quick word from the team</h2>
-            <p>A couple of tips from Nick and Andy before you book your demo.</p>
+            <p>A couple of quick tips before you book your demo.</p>
           </div>
           <div className="ty-trainer-grid">
             <div className="ty-trainer-card">
-              <div className="ty-trainer-placeholder">
-                <span className="ty-trainer-play-icon">▶</span>
-                <span className="ty-trainer-soon">Video coming soon</span>
+              <div className="ty-trainer-video-wrap">
+                <iframe
+                  src="https://player.vimeo.com/video/1216126287?h=21c12aea35&badge=0&autopause=0&player_id=0&app_id=58479"
+                  frameBorder="0"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                  allowFullScreen
+                  title="Andy Day — tip 1"
+                ></iframe>
               </div>
               <div className="ty-trainer-caption">
-                <strong>Nick Smallman</strong>
-                <span>CEO</span>
+                <strong>Andy Day</strong>
+                <span>Lead Trainer</span>
               </div>
             </div>
             <div className="ty-trainer-card">
-              <div className="ty-trainer-placeholder">
-                <span className="ty-trainer-play-icon">▶</span>
-                <span className="ty-trainer-soon">Video coming soon</span>
+              <div className="ty-trainer-video-wrap">
+                <iframe
+                  src="https://player.vimeo.com/video/1216126286?h=88171588ba&badge=0&autopause=0&player_id=0&app_id=58479"
+                  frameBorder="0"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                  allowFullScreen
+                  title="Andy Day — tip 2"
+                ></iframe>
               </div>
               <div className="ty-trainer-caption">
                 <strong>Andy Day</strong>

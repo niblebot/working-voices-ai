@@ -331,7 +331,9 @@
   position: relative;
   border-radius: 14px;
   background: linear-gradient(150deg, var(--ty-ink-3), var(--ty-ink-2));
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 5;
+  max-width: 420px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,6 +342,7 @@
 
 .ty-locked-media-wrap-audio {
   aspect-ratio: auto;
+  max-width: none;
   padding: 32px 0;
 }
 

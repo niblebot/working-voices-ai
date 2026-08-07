@@ -90,10 +90,15 @@
 
 /* Targeted at the actual content wrappers rather than a blanket ">  *" —
    the glow divs above are position:absolute (from globals.css) and must
-   stay that way, not get caught by a generic child selector. */
-.ty-glow-section > .section-header,
-.ty-glow-section > .ty-demo-frame,
-.ty-glow-section > .ty-locked-player {
+   stay that way, not get caught by a generic child selector. Descendant
+   (not direct-child) selectors: .ty-locked-player in particular renders one
+   wrapper div deeper than a direct child, which silently let the glow's
+   full (non-transparent-only) bounding box sit above it and swallow clicks
+   on whichever answer button happened to be under the glow's drift at the
+   moment — not every round, since the glow keeps animating position. */
+.ty-glow-section .section-header,
+.ty-glow-section .ty-demo-frame,
+.ty-glow-section .ty-locked-player {
   position: relative;
   z-index: 1;
 }
@@ -374,8 +379,13 @@
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Not scale() — this button lives inside .ty-locked-media-wrap, which
+   needs overflow:hidden to clip the video/audio to its rounded corners,
+   and that same clipping was chopping the flat sides off the button
+   whenever it grew past the wrap's edge on hover. */
 .ty-play-btn:hover {
-  transform: scale(1.05);
+  filter: brightness(1.08);
+  transform: translateY(-2px);
 }
 
 .ty-play-icon {

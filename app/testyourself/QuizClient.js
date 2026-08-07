@@ -195,6 +195,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const nextIndexRef = useRef(0);
   const choicesRef = useRef(null);
   const preclipRef = useRef(null);
+  const playerRef = useRef(null);
 
   // Each clip after the first advances automatically (via onEnded), with no
   // user gesture of its own — mobile Safari silently refuses to play that,
@@ -247,6 +248,16 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   useEffect(() => {
     if (stage !== 'choosing') return;
     scrollToRef(choicesRef, { block: 'center' });
+  }, [stage]);
+
+  // The 4:5 portrait clips are taller than the "get ready" countdown ring
+  // that was centered a moment earlier, so once real playback actually
+  // starts the frame can end up cropped by the viewport (bottom cut off,
+  // or the top scrolled past) until the user scrolls manually. Re-center
+  // on the whole player every time a new clip starts playing for real.
+  useEffect(() => {
+    if (typeof stage !== 'number') return;
+    scrollToRef(playerRef, { block: 'center' });
   }, [stage]);
 
   // The round only gets centered once, when it first appears — but the
@@ -365,7 +376,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const mediaProps = type === 'video' ? { playsInline: true } : {};
 
   return (
-    <div className="ty-locked-player">
+    <div className="ty-locked-player" ref={playerRef}>
       <div className={'ty-locked-media-wrap' + (type === 'audio' ? ' ty-locked-media-wrap-audio' : '')}>
         {stage === 'idle' && (
           <button type="button" className="ty-play-btn" onClick={handleStart}>

@@ -410,6 +410,10 @@ export default function QuizClient() {
   const [sessionStats, setSessionStats] = useState(null);
   const activeSectionRef = useRef(null);
   const roundPlayerRef = useRef(null);
+  // Set when someone uses the quiet "skip" link rather than actually
+  // playing the rounds — so that jump to Reveal never logs a fake 0/3
+  // session into the real live-counter stats.
+  const skippedQuizRef = useRef(false);
 
   // Each journey stage (a round, timed-out, reveal) swaps in below whatever
   // the user was already looking at, so without this the page just sits
@@ -479,12 +483,14 @@ export default function QuizClient() {
   // per-round stats already used elsewhere on the site.
   useEffect(() => {
     if (journeyStage !== 'reveal') return;
-    const finalCorrectCount = results.filter((r) => r.correct).length;
-    fetch('/api/quiz-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correctCount: finalCorrectCount, totalRounds: stages.length }),
-    }).catch(() => {});
+    if (!skippedQuizRef.current) {
+      const finalCorrectCount = results.filter((r) => r.correct).length;
+      fetch('/api/quiz-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correctCount: finalCorrectCount, totalRounds: stages.length }),
+      }).catch(() => {});
+    }
     fetch('/api/quiz-session')
       .then((res) => res.json())
       .then((data) => setSessionStats(data))
@@ -493,6 +499,14 @@ export default function QuizClient() {
 
   function handleStart() {
     setJourneyStage(stages.length > 0 ? 0 : 'reveal');
+  }
+
+  // Quiet escape hatch straight to the results/demo sections — mainly so
+  // the page can be checked quickly without playing through the rounds
+  // every time, not something surfaced as a real option on the page.
+  function handleSkipQuiz() {
+    skippedQuizRef.current = true;
+    setJourneyStage('reveal');
   }
 
   function logAttempt(correct) {
@@ -608,14 +622,19 @@ export default function QuizClient() {
             real life.
           </p>
           {journeyStage === 'hook' && (
-            <button
-              type="button"
-              className="ty-cta-btn"
-              onClick={handleStart}
-              disabled={stages.length === 0}
-            >
-              Start the challenge →
-            </button>
+            <>
+              <button
+                type="button"
+                className="ty-cta-btn"
+                onClick={handleStart}
+                disabled={stages.length === 0}
+              >
+                Start the challenge →
+              </button>
+              <button type="button" className="ty-secondary-btn ty-skip-link" onClick={handleSkipQuiz}>
+                Skip the challenge
+              </button>
+            </>
           )}
         </div>
       </section>
@@ -715,6 +734,7 @@ export default function QuizClient() {
             <div className="ty-result-banner">
               {correctCount} / {totalRounds}
             </div>
+            {results.length > 0 && (
             <div className="ty-recap-list">
               {results.map((r, i) => (
                 <div key={i} className={'ty-recap-row' + (r.correct ? ' correct' : '')}>
@@ -730,6 +750,7 @@ export default function QuizClient() {
                 </div>
               ))}
             </div>
+            )}
             <p>{revealMessage}</p>
             <p>
               Even if your organisation has the best firewall money can buy, it will not

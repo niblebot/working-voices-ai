@@ -248,6 +248,20 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* Deliberately closer to invisible than the timed-out screen's version —
+   an escape hatch for quick testing, not something meant to catch the eye. */
+.ty-skip-link {
+  margin-top: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.ty-skip-link:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 @media (max-width: 860px) {
   .ty-hook-hero {
     min-height: 520px;

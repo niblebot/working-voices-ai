@@ -21,16 +21,18 @@ const POOLS = {
       '/testyourself/fake  - signature.mp4',
     ],
   },
+  // Dedicated pool for the first video round — all Nick Smallman clips.
   video1: {
     reals: [
-      '/testyourself/real - comfotable.mp4',
-      '/testyourself/real -will smith.mp4',
-      '/testyourself/Real - social media.mp4',
+      '/testyourself/nick real 1.mp4',
+      '/testyourself/nick real 2.mp4',
     ],
     fakes: [
-      '/testyourself/fake - will smith video.mp4',
-      '/testyourself/Fake - bread pitt.mp4',
-      '/testyourself/fake mouth.mp4',
+      '/testyourself/nick fake 1.mp4',
+      '/testyourself/nick fake 2.mp4',
+      '/testyourself/nick fake 3.mp4',
+      '/testyourself/nick fake 4.mp4',
+      '/testyourself/Nick fake 5.mp4',
     ],
   },
   // Dedicated pool for the second video round — all Andy Day clips.

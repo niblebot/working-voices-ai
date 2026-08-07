@@ -189,6 +189,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const [preClipSecondsLeft, setPreClipSecondsLeft] = useState(PRE_CLIP_SECONDS);
   const mediaRefs = useRef([]);
   const answeredRef = useRef(false);
+  const startedRef = useRef(false);
   const intervalRef = useRef(null);
   const preClipIntervalRef = useRef(null);
   const nextIndexRef = useRef(0);
@@ -199,9 +200,21 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // user gesture of its own — mobile Safari silently refuses to play that,
   // which is why it used to freeze on clip 2. Fixed below by mounting every
   // clip's element up front and priming them all inside the Play tap.
+  //
+  // Also enforces "only the active clip may ever be unpaused" as a hard
+  // invariant every time the stage changes, actively pausing every other
+  // clip — a cheap safety net against two clips ever audibly overlapping,
+  // regardless of what caused a stray one to still be playing.
   useEffect(() => {
     if (typeof stage !== 'number') return;
-    mediaRefs.current[stage]?.play().catch(() => {});
+    mediaRefs.current.forEach((el, i) => {
+      if (!el) return;
+      if (i === stage) {
+        el.play().catch(() => {});
+      } else if (!el.paused) {
+        el.pause();
+      }
+    });
   }, [stage]);
 
   // Safety net for a clip that silently never fires "ended" — no error, just
@@ -326,14 +339,22 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // keeps the earlier "two clips visibly overlapping" glitch from coming
   // back, since every clip here is muted and hidden the whole time anyway.
   function handleStart() {
+    // Guards against a second, stray invocation of this same tap — e.g. an
+    // auto-scroll landing the page under a delayed/duplicate click right as
+    // this button leaves the screen — which would otherwise prime and start
+    // the round twice, producing two overlapping, audible clips.
+    if (startedRef.current) return;
+    startedRef.current = true;
     mediaRefs.current.forEach((el) => {
       if (!el) return;
       el.muted = true;
+      el.volume = 0;
       const playPromise = Promise.resolve(el.play()).catch(() => {});
       Promise.race([playPromise, new Promise((resolve) => setTimeout(resolve, 300))]).then(() => {
         el.pause();
         el.currentTime = 0;
         el.muted = false;
+        el.volume = 1;
       });
     });
     nextIndexRef.current = 0;

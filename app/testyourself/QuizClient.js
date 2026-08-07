@@ -21,7 +21,7 @@ const POOLS = {
       '/testyourself/fake  - signature.mp4',
     ],
   },
-  video: {
+  video1: {
     reals: [
       '/testyourself/real - comfotable.mp4',
       '/testyourself/real -will smith.mp4',
@@ -33,9 +33,31 @@ const POOLS = {
       '/testyourself/fake mouth.mp4',
     ],
   },
+  // Dedicated pool for the second video round — all Andy Day clips.
+  video2: {
+    reals: [
+      '/testyourself/Andy real 1.mp4',
+      '/testyourself/Andy real 2.mp4',
+      '/testyourself/Andy real 3.mp4',
+    ],
+    fakes: [
+      '/testyourself/Andy Fake 1.mp4',
+      '/testyourself/Andy fake 2.mp4',
+      '/testyourself/Andy fake 3.mp4',
+      '/testyourself/Andy fake 4.mp4',
+      '/testyourself/Andy fake 5.mp4',
+    ],
+  },
 };
 
-const ROUND_ORDER = ['audio', 'video', 'video']; // voice first, then two video rounds
+// Maps a pool key to the media kind it renders as (audio vs video), since
+// the two video rounds now draw from separate pools but still share copy
+// and player behavior keyed off "video".
+function kindOf(poolKey) {
+  return poolKey === 'audio' ? 'audio' : 'video';
+}
+
+const ROUND_ORDER = ['audio', 'video1', 'video2']; // voice, then two video rounds (each with its own pool)
 const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
 const PRE_CLIP_SECONDS = 3; // "get ready" beat shown before every clip, including the first
@@ -103,28 +125,21 @@ function shuffled(arr) {
 }
 
 function buildStages() {
-  const activeTypes = ROUND_ORDER.filter((type) => POOLS[type].reals.length > 0);
-
-  // Draw distinct real clips across rounds of the same type (e.g. the two
-  // video rounds), so the same real clip doesn't show up twice in one visit.
-  const realsByType = {};
-  for (const type of new Set(activeTypes)) {
-    const countNeeded = activeTypes.filter((t) => t === type).length;
-    realsByType[type] = shuffled(POOLS[type].reals).slice(0, countNeeded);
-  }
+  const activePoolKeys = ROUND_ORDER.filter((poolKey) => POOLS[poolKey].reals.length > 0);
   const usedCount = {};
 
-  return activeTypes.map((type, i) => {
-    const pool = POOLS[type];
-    const drawIndex = usedCount[type] || 0;
-    usedCount[type] = drawIndex + 1;
-    const real = realsByType[type][drawIndex % realsByType[type].length];
+  return activePoolKeys.map((poolKey, i) => {
+    const pool = POOLS[poolKey];
+    const type = kindOf(poolKey);
+    const real = shuffled(pool.reals)[0];
     const fakes = shuffled(pool.fakes).slice(0, Math.min(FAKES_PER_ROUND, pool.fakes.length));
-    const id = `${type}-${i}`;
-    // Position among rounds of the same type (0 = first video round, 1 =
-    // second, etc.) so the copy can make clear a repeat-looking round is
-    // actually new, instead of every video round reading identically.
-    return { key: id, type, round: { id, real, fakes }, orderWithinType: drawIndex };
+    const id = `${poolKey}-${i}`;
+    // Position among rounds of the same rendered type (0 = first video
+    // round, 1 = second, etc.) so the copy can make clear a repeat-looking
+    // round is actually new, instead of every video round reading identically.
+    const orderWithinType = usedCount[type] || 0;
+    usedCount[type] = orderWithinType + 1;
+    return { key: id, type, round: { id, real, fakes }, orderWithinType };
   });
 }
 

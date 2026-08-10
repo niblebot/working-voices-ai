@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { logSession, getSessionStats } from '@/lib/db';
 
-const MIN_SAMPLE = 15;
+const MIN_SAMPLE = 1;
 
 export async function GET() {
   try {

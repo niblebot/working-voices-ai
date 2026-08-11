@@ -60,6 +60,14 @@ function kindOf(poolKey) {
 }
 
 const ROUND_ORDER = ['audio', 'video1', 'video2']; // voice, then two video rounds (each with its own pool)
+
+// The embed's own loop=0 query param isn't reliably honored — Vimeo videos
+// can carry a per-video "Loop" setting in the dashboard that overrides it.
+// Sending setLoop via the Player postMessage API takes precedence, so this
+// forces it off regardless of that per-video setting.
+function disableVimeoLoop(iframeEl) {
+  iframeEl?.contentWindow?.postMessage(JSON.stringify({ method: 'setLoop', value: false }), 'https://player.vimeo.com');
+}
 const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
 const PRE_CLIP_SECONDS = 3; // "get ready" beat shown before every clip, including the first
@@ -501,6 +509,8 @@ export default function QuizClient() {
   const [sessionStats, setSessionStats] = useState(null);
   const activeSectionRef = useRef(null);
   const roundPlayerRef = useRef(null);
+  const trainerVideo1Ref = useRef(null);
+  const trainerVideo2Ref = useRef(null);
   // Set when someone uses the quiet "skip" link rather than actually
   // playing the rounds — so that jump to Reveal never logs a fake 0/3
   // session into the real live-counter stats.
@@ -880,11 +890,13 @@ export default function QuizClient() {
             <div className="ty-trainer-card">
               <div className="ty-trainer-video-wrap">
                 <iframe
+                  ref={trainerVideo1Ref}
                   src="https://player.vimeo.com/video/1216952510?h=619051678f&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
                   title="Andy Day — tip 1"
+                  onLoad={(e) => disableVimeoLoop(e.currentTarget)}
                 ></iframe>
               </div>
               <span className="ty-trainer-video-label">What you'll learn</span>
@@ -896,11 +908,13 @@ export default function QuizClient() {
             <div className="ty-trainer-card">
               <div className="ty-trainer-video-wrap">
                 <iframe
+                  ref={trainerVideo2Ref}
                   src="https://player.vimeo.com/video/1217347088?h=3b63c0be21&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
                   title="Nick Smallman — tip"
+                  onLoad={(e) => disableVimeoLoop(e.currentTarget)}
                 ></iframe>
               </div>
               <span className="ty-trainer-video-label">How you'll learn</span>

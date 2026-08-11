@@ -80,9 +80,9 @@ function scrollToRef(ref, opts) {
 const POST_REVEAL_LABELS = [
   'The Reveal',
   'The Big Mistake',
-  'Trusted By',
   'See It For Yourself',
   'Ready When You Are',
+  'Trusted By',
 ];
 
 // Same 8 logos already confirmed as real clients on the homepage — kept in
@@ -520,10 +520,10 @@ export default function QuizClient() {
   // fold, instead of reading as one long scroll.
   const revealRef = useRef(null);
   const bigMistakeRef = useRef(null);
-  const trustedByRef = useRef(null);
   const videoSectionRef = useRef(null);
   const demoRef = useRef(null);
-  const postRevealRefs = [revealRef, bigMistakeRef, trustedByRef, videoSectionRef, demoRef];
+  const trustedByRef = useRef(null);
+  const postRevealRefs = [revealRef, bigMistakeRef, videoSectionRef, demoRef, trustedByRef];
   const [activePostRevealIndex, setActivePostRevealIndex] = useState(0);
 
   useEffect(() => {
@@ -857,17 +857,6 @@ export default function QuizClient() {
         </section>
       )}
 
-      {/* TRUSTED BY — same logos/copy as the homepage's About section */}
-      {journeyStage === 'reveal' && (
-        <section ref={trustedByRef} className="section section-dark ty-glow-section">
-          <div className="hero-glow"></div>
-          <div className="section-header">
-            <p>We deliver training to over 100 of the world's largest companies including:</p>
-          </div>
-          <TrustedByMarquee />
-        </section>
-      )}
-
       {/* SEE IT FOR YOURSELF — Andy's tips; Nick's slot swaps in once recorded */}
       {journeyStage === 'reveal' && (
         <section ref={videoSectionRef} className="section section-dark ty-glow-section">
@@ -897,17 +886,17 @@ export default function QuizClient() {
             <div className="ty-trainer-card">
               <div className="ty-trainer-video-wrap">
                 <iframe
-                  src="https://player.vimeo.com/video/1216126286?h=88171588ba&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
+                  src="https://player.vimeo.com/video/1217347088?h=3b63c0be21&badge=0&autopause=0&loop=0&player_id=0&app_id=58479"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
-                  title="Andy Day — tip 2"
+                  title="Nick Smallman — tip"
                 ></iframe>
               </div>
               <span className="ty-trainer-video-label">How you'll learn</span>
               <div className="ty-trainer-caption">
-                <strong>Andy Day</strong>
-                <span>Lead Trainer</span>
+                <strong>Nick Smallman</strong>
+                <span>Founder and CEO of Working Voices</span>
               </div>
             </div>
           </div>
@@ -952,6 +941,17 @@ export default function QuizClient() {
               <p className="ty-lead-error">Something went wrong — please try again.</p>
             )}
           </div>
+        </section>
+      )}
+
+      {/* TRUSTED BY — same logos/copy as the homepage's About section */}
+      {journeyStage === 'reveal' && (
+        <section ref={trustedByRef} className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
+          <div className="section-header">
+            <p>We deliver training to over 100 of the world's largest companies including:</p>
+          </div>
+          <TrustedByMarquee />
         </section>
       )}
 

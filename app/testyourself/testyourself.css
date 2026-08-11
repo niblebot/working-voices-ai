@@ -897,6 +897,10 @@
   width: auto;
   max-width: 220px;
   object-fit: contain;
+  /* Source files are full-color/black-on-transparent for the homepage's
+     light logo strip — force every mark to a flat white silhouette so
+     none of them (e.g. Sony's black wordmark) go invisible against navy. */
+  filter: brightness(0) invert(1);
 }
 
 @media (prefers-reduced-motion: reduce) {

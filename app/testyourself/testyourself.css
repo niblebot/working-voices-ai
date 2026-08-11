@@ -865,7 +865,7 @@
   display: flex;
   align-items: center;
   width: max-content;
-  gap: 80px;
+  gap: 56px;
   animation: ty-logos-scroll 28s linear infinite;
 }
 
@@ -878,8 +878,14 @@
   to { transform: translateX(-50%); }
 }
 
+/* Fixed slot width (not sized to each logo's own content) so the gap reads
+   as even rhythm between logos regardless of how wide or narrow any one
+   mark happens to be — a narrow icon (NASA) next to a wide wordmark
+   (Microsoft) used to look closer together than two wide wordmarks side
+   by side, even though the CSS gap was identical in both cases. */
 .ty-logos-item {
   flex: 0 0 auto;
+  width: 190px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -895,7 +901,7 @@
 .ty-logos-item img {
   height: 72px;
   width: auto;
-  max-width: 220px;
+  max-width: 100%;
   object-fit: contain;
 }
 
@@ -916,14 +922,14 @@
 
 @media (max-width: 640px) {
   .ty-logos-item {
+    width: 140px;
     height: 60px;
   }
   .ty-logos-item img {
     height: 48px;
-    max-width: 150px;
   }
   .ty-logos-track {
-    gap: 48px;
+    gap: 32px;
   }
 }
 

@@ -98,7 +98,10 @@ const POST_REVEAL_LABELS = [
 // wired to the CMS content.js the homepage pulls from.
 const TRUSTED_BY_LOGOS = [
   { src: '/logos/nasa.svg', alt: 'NASA' },
-  { src: '/logos/microsoft.svg', alt: 'Microsoft' },
+  // Page-scoped copy with the wordmark recolored white (the shared
+  // microsoft.svg is grey, tuned for the homepage's light background) —
+  // the coloured squares are untouched.
+  { src: '/logos/microsoft-dark.svg', alt: 'Microsoft' },
   // Flat near-black/black marks that are otherwise invisible on the navy
   // background — forcing these three to white loses no detail since
   // they're single-color to begin with. Everything else keeps its real
@@ -106,7 +109,10 @@ const TRUSTED_BY_LOGOS = [
   // flatten them into an unrecognizable blob), and Barclays/Rolex/Nomura
   // already read fine against navy as-is.
   { src: '/logos/jpmorgan.svg', alt: 'J.P. Morgan', mono: true },
-  { src: '/logos/barclays.svg', alt: 'Barclays' },
+  // The icon alone (from the shared barclays.svg) doesn't read as
+  // "Barclays" on its own the way NASA's mark does — this page-scoped
+  // copy adds the wordmark next to it.
+  { src: '/logos/barclays-full.svg', alt: 'Barclays' },
   { src: '/logos/sony.svg', alt: 'Sony', mono: true },
   { src: '/logos/rolex.svg', alt: 'Rolex' },
   { src: '/logos/blackrock.svg', alt: 'BlackRock', mono: true },

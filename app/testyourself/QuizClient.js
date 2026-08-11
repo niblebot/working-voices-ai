@@ -80,10 +80,42 @@ function scrollToRef(ref, opts) {
 const POST_REVEAL_LABELS = [
   'The Reveal',
   'The Big Mistake',
+  'Trusted By',
   'See It For Yourself',
-  'The Case Against E-Learning',
   'Ready When You Are',
 ];
+
+// Same 8 logos already confirmed as real clients on the homepage — kept in
+// sync manually rather than imported, since this page's content isn't
+// wired to the CMS content.js the homepage pulls from.
+const TRUSTED_BY_LOGOS = [
+  { src: '/logos/nasa.svg', alt: 'NASA' },
+  { src: '/logos/microsoft.svg', alt: 'Microsoft' },
+  { src: '/logos/jpmorgan.svg', alt: 'J.P. Morgan' },
+  { src: '/logos/barclays.svg', alt: 'Barclays' },
+  { src: '/logos/sony.svg', alt: 'Sony' },
+  { src: '/logos/rolex.svg', alt: 'Rolex' },
+  { src: '/logos/blackrock.svg', alt: 'BlackRock' },
+  { src: '/logos/nomura.svg', alt: 'Nomura' },
+];
+
+function TrustedByMarquee() {
+  // Duplicated once so the track can loop seamlessly: animating exactly
+  // -50% moves the first copy fully offscreen right as the second copy
+  // (identical) lands in its place, invisibly resetting to 0%.
+  const logos = [...TRUSTED_BY_LOGOS, ...TRUSTED_BY_LOGOS];
+  return (
+    <div className="ty-logos-marquee">
+      <div className="ty-logos-track">
+        {logos.map((logo, i) => (
+          <div className="ty-logos-item" key={i} aria-hidden={i >= TRUSTED_BY_LOGOS.length}>
+            <img src={logo.src} alt={logo.alt} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function PostRevealNav({ refs, activeIndex, onNavigate }) {
   function goTo(i) {
@@ -488,10 +520,10 @@ export default function QuizClient() {
   // fold, instead of reading as one long scroll.
   const revealRef = useRef(null);
   const bigMistakeRef = useRef(null);
+  const trustedByRef = useRef(null);
   const videoSectionRef = useRef(null);
-  const elearningRef = useRef(null);
   const demoRef = useRef(null);
-  const postRevealRefs = [revealRef, bigMistakeRef, videoSectionRef, elearningRef, demoRef];
+  const postRevealRefs = [revealRef, bigMistakeRef, trustedByRef, videoSectionRef, demoRef];
   const [activePostRevealIndex, setActivePostRevealIndex] = useState(0);
 
   useEffect(() => {
@@ -816,12 +848,23 @@ export default function QuizClient() {
           <div className="hero-glow"></div>
           <div className="section-header">
             <span className="section-label">The Big Mistake</span>
-            <h2>Everyone treats this as a cyber problem — it's not, it's psychological.</h2>
+            <h2>People assume this is a cyber problem. It's not, it's about the psychology of your key employees.</h2>
             <p>
-              Around 68% of breaches involve a human being, not a breached firewall. This is
-              a human problem, that needs a human solution.
+              Around 68% of breaches involve a human being, not a breached firewall. It's a
+              human problem, and it needs a human solution.
             </p>
           </div>
+        </section>
+      )}
+
+      {/* TRUSTED BY — same logos/copy as the homepage's About section */}
+      {journeyStage === 'reveal' && (
+        <section ref={trustedByRef} className="section section-dark ty-glow-section">
+          <div className="hero-glow"></div>
+          <div className="section-header">
+            <p>We deliver training to over 100 of the world's largest companies including:</p>
+          </div>
+          <TrustedByMarquee />
         </section>
       )}
 
@@ -845,6 +888,7 @@ export default function QuizClient() {
                   title="Andy Day — tip 1"
                 ></iframe>
               </div>
+              <span className="ty-trainer-video-label">What you'll learn</span>
               <div className="ty-trainer-caption">
                 <strong>Andy Day</strong>
                 <span>Lead Trainer</span>
@@ -860,38 +904,13 @@ export default function QuizClient() {
                   title="Andy Day — tip 2"
                 ></iframe>
               </div>
+              <span className="ty-trainer-video-label">How you'll learn</span>
               <div className="ty-trainer-caption">
                 <strong>Andy Day</strong>
                 <span>Lead Trainer</span>
               </div>
             </div>
           </div>
-        </section>
-      )}
-
-      {/* 07 THE CASE AGAINST E-LEARNING */}
-      {journeyStage === 'reveal' && (
-        <section ref={elearningRef} className="section section-dark ty-glow-section">
-          <div className="hero-glow"></div>
-          <div className="section-header">
-            <span className="section-label">The Case Against E-Learning</span>
-            <h2>Why a training video is ineffective</h2>
-            <p>
-              eLearning is great for building awareness but long eLearning courses are where
-              it falls down. Only 1 in 5 people finish the average online course, and
-              according to the{' '}
-              <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4492928/" target="_blank" rel="noopener noreferrer">
-                Ebbinghaus forgetting curve
-              </a>
-              , up to 90% of what they do learn is forgotten within a week. That's where we
-              come in.
-            </p>
-          </div>
-          <img
-            className="ty-elearning-image"
-            src="/testyourself/elearning-disengaged.png"
-            alt="A tired, checked-out employee watching an online training video late in the evening"
-          />
         </section>
       )}
 

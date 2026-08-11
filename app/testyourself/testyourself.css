@@ -832,22 +832,90 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+.ty-trainer-video-label {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--yellow);
+}
+
 @media (max-width: 640px) {
   .ty-trainer-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.ty-elearning-image {
-  display: block;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: 16px;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+/* TRUSTED BY — endlessly scrolling logo strip. The track holds the logo
+   set twice back-to-back; animating exactly -50% of its own width moves
+   the first copy fully offscreen just as the second (identical) copy
+   lands in its place, so the loop point is invisible. */
+.ty-logos-marquee {
   position: relative;
   z-index: 1;
+  overflow: hidden;
+  margin-top: 8px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.ty-logos-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: 80px;
+  animation: ty-logos-scroll 28s linear infinite;
+}
+
+.ty-logos-marquee:hover .ty-logos-track {
+  animation-play-state: paused;
+}
+
+@keyframes ty-logos-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ty-logos-item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+  opacity: 0.8;
+  transition: opacity 0.25s;
+}
+
+.ty-logos-item:hover {
+  opacity: 1;
+}
+
+.ty-logos-item img {
+  height: 72px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ty-logos-track {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ty-logos-item {
+    height: 60px;
+  }
+  .ty-logos-item img {
+    height: 48px;
+    max-width: 150px;
+  }
+  .ty-logos-track {
+    gap: 48px;
+  }
 }
 
 /* REVEAL — moody background photo behind the score, faded top/bottom so it

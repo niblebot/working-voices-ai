@@ -897,9 +897,14 @@
   width: auto;
   max-width: 220px;
   object-fit: contain;
-  /* Source files are full-color/black-on-transparent for the homepage's
-     light logo strip — force every mark to a flat white silhouette so
-     none of them (e.g. Sony's black wordmark) go invisible against navy. */
+}
+
+/* Only the flat near-black/black marks need help on the navy background —
+   forcing THESE to white loses no detail since they're single-color to
+   begin with. Multi-color marks (NASA, Microsoft) keep their real colors:
+   flattening them to solid white would erase the shape entirely, not just
+   recolor it. Barclays/Rolex/Nomura already read fine as-is. */
+.ty-logos-item-mono img {
   filter: brightness(0) invert(1);
 }
 

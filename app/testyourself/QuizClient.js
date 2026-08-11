@@ -91,11 +91,17 @@ const POST_REVEAL_LABELS = [
 const TRUSTED_BY_LOGOS = [
   { src: '/logos/nasa.svg', alt: 'NASA' },
   { src: '/logos/microsoft.svg', alt: 'Microsoft' },
-  { src: '/logos/jpmorgan.svg', alt: 'J.P. Morgan' },
+  // Flat near-black/black marks that are otherwise invisible on the navy
+  // background — forcing these three to white loses no detail since
+  // they're single-color to begin with. Everything else keeps its real
+  // color: NASA and Microsoft are multi-color (forcing white would
+  // flatten them into an unrecognizable blob), and Barclays/Rolex/Nomura
+  // already read fine against navy as-is.
+  { src: '/logos/jpmorgan.svg', alt: 'J.P. Morgan', mono: true },
   { src: '/logos/barclays.svg', alt: 'Barclays' },
-  { src: '/logos/sony.svg', alt: 'Sony' },
+  { src: '/logos/sony.svg', alt: 'Sony', mono: true },
   { src: '/logos/rolex.svg', alt: 'Rolex' },
-  { src: '/logos/blackrock.svg', alt: 'BlackRock' },
+  { src: '/logos/blackrock.svg', alt: 'BlackRock', mono: true },
   { src: '/logos/nomura.svg', alt: 'Nomura' },
 ];
 
@@ -108,7 +114,11 @@ function TrustedByMarquee() {
     <div className="ty-logos-marquee">
       <div className="ty-logos-track">
         {logos.map((logo, i) => (
-          <div className="ty-logos-item" key={i} aria-hidden={i >= TRUSTED_BY_LOGOS.length}>
+          <div
+            className={'ty-logos-item' + (logo.mono ? ' ty-logos-item-mono' : '')}
+            key={i}
+            aria-hidden={i >= TRUSTED_BY_LOGOS.length}
+          >
             <img src={logo.src} alt={logo.alt} />
           </div>
         ))}

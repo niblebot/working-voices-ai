@@ -177,6 +177,16 @@
   z-index: 3;
 }
 
+.ty-urgency-line {
+  max-width: 640px;
+  margin: 0 auto 22px;
+  font-size: clamp(17px, 1.9vw, 20px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+}
+
 .ty-kinetic-heading {
   display: flex;
   flex-direction: column;
@@ -253,18 +263,16 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* Deliberately closer to invisible than the timed-out screen's version —
-   an escape hatch for quick testing, not something meant to catch the eye. */
 .ty-skip-link {
   margin-top: 20px;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 700;
   text-transform: none;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .ty-skip-link:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @media (max-width: 860px) {

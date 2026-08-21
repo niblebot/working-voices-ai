@@ -63,11 +63,38 @@ const ROUND_ORDER = ['audio', 'video1', 'video2']; // voice, then two video roun
 
 // The embed's own loop=0 query param isn't reliably honored — Vimeo videos
 // can carry a per-video "Loop" setting in the dashboard that overrides it.
-// Sending setLoop via the Player postMessage API takes precedence, so this
-// forces it off regardless of that per-video setting.
-function disableVimeoLoop(iframeEl) {
-  iframeEl?.contentWindow?.postMessage(JSON.stringify({ method: 'setLoop', value: false }), 'https://player.vimeo.com');
+// Sending setLoop via the Player postMessage API takes precedence, but only
+// once the player is actually listening — sending it on the iframe's own
+// 'load' event races Vimeo's internal player script, which is still
+// initializing at that point and silently drops commands sent too early.
+// vimeoPostMessage/handleVimeoReadyMessage below wait for the player's own
+// unprompted "ready" event before sending anything, which is the documented
+// correct handshake, then also subscribe to "finish" as a second, independent
+// safety net: an explicit pause + seek-to-0 in case setLoop alone doesn't
+// fully suppress an automatic replay.
+function vimeoPostMessage(win, method, value) {
+  win?.postMessage(JSON.stringify(value === undefined ? { method } : { method, value }), 'https://player.vimeo.com');
 }
+
+function handleVimeoReadyMessage(iframes, e) {
+  if (e.origin !== 'https://player.vimeo.com') return;
+  const iframe = iframes.find((f) => f && f.contentWindow === e.source);
+  if (!iframe) return;
+  let data;
+  try {
+    data = JSON.parse(e.data);
+  } catch {
+    return;
+  }
+  if (data.event === 'ready') {
+    vimeoPostMessage(e.source, 'setLoop', false);
+    vimeoPostMessage(e.source, 'addEventListener', 'finish');
+  } else if (data.event === 'finish') {
+    vimeoPostMessage(e.source, 'pause');
+    vimeoPostMessage(e.source, 'setCurrentTime', 0);
+  }
+}
+
 const FAKES_PER_ROUND = 2;
 const DECISION_SECONDS = 5;
 const PRE_CLIP_SECONDS = 3; // "get ready" beat shown before every clip, including the first
@@ -252,6 +279,22 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   const choicesRef = useRef(null);
   const preclipRef = useRef(null);
   const playerRef = useRef(null);
+
+  // A detached <audio>/<video> element doesn't stop playing just because
+  // it's removed from the DOM — browsers only pause it if something
+  // explicitly calls .pause(). Without this, a clip that was still mid-
+  // playback when this round's component unmounts (e.g. restarting the
+  // quiz on the same page load, without a full reload) keeps making sound
+  // in the background, invisible and undetectable to the next round's own
+  // instance, until it overlaps with that round's audio — the "double
+  // play on a repeat run" glitch.
+  useEffect(() => {
+    return () => {
+      mediaRefs.current.forEach((el) => {
+        if (el && !el.paused) el.pause();
+      });
+    };
+  }, []);
 
   // Each clip after the first advances automatically (via onEnded), with no
   // user gesture of its own — mobile Safari silently refuses to play that,
@@ -522,6 +565,18 @@ export default function QuizClient() {
   // session into the real live-counter stats.
   const skippedQuizRef = useRef(false);
 
+  // Forces both trainer videos to stop after one play — see
+  // handleVimeoReadyMessage above for why this waits for the player's own
+  // "ready" event rather than sending setLoop on the iframe's load event.
+  useEffect(() => {
+    if (journeyStage !== 'reveal') return undefined;
+    const iframes = [trainerVideo1Ref.current, trainerVideo2Ref.current].filter(Boolean);
+    if (iframes.length === 0) return undefined;
+    const listener = (e) => handleVimeoReadyMessage(iframes, e);
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [journeyStage]);
+
   // Each journey stage (a round, timed-out, reveal) swaps in below whatever
   // the user was already looking at, so without this the page just sits
   // still and it looks like the button/choice did nothing.
@@ -697,7 +752,7 @@ export default function QuizClient() {
   const revealMessage = sessionStats?.ready
     ? isPerfectScore
       ? `${sessionStats.total} people have taken this test, and only ${sessionStats.perfectPct}% spotted every deepfake. That makes you rare, but it's also a game of chance, and luck can turn against you.`
-      : `${sessionStats.total} people have taken this test, and ${sessionStats.failPct}% failed to spot the deepfake. You're not alone.`
+      : `${sessionStats.total} people have taken this test, and ${sessionStats.failPct}% failed to get all three questions right. You're not alone.`
     : isPerfectScore
     ? "Perfect score — good instincts. But don't get comfortable: that was a tiny sample, and in the real world the odds don't always favour you. It only takes one moment of misplaced trust."
     : 'Getting it wrong means your brain did exactly what it\'s built to do, which is to trust a calm and confident request. That is the instinct criminals are exploiting.';
@@ -717,6 +772,10 @@ export default function QuizClient() {
         <div className="hero-glow hero-glow-2"></div>
         <div className="section-header ty-hook-content">
           <span className="section-label">Test Yourself</span>
+          <p className="ty-urgency-line">
+            Every business is under relentless attack from criminal networks. They use the
+            latest AI technology to trick your employees into letting them in.
+          </p>
           <h2 className="ty-kinetic-heading">
             <span className="ty-k-line1">Could you</span>
             <span className="ty-k-line2">spot a</span>
@@ -902,7 +961,6 @@ export default function QuizClient() {
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
                   title="Andy Day — tip 1"
-                  onLoad={(e) => disableVimeoLoop(e.currentTarget)}
                 ></iframe>
               </div>
               <span className="ty-trainer-video-label">What you'll learn</span>
@@ -920,7 +978,6 @@ export default function QuizClient() {
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   allowFullScreen
                   title="Nick Smallman — tip"
-                  onLoad={(e) => disableVimeoLoop(e.currentTarget)}
                 ></iframe>
               </div>
               <span className="ty-trainer-video-label">How you'll learn</span>

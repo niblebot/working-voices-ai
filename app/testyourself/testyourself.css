@@ -177,46 +177,50 @@
   z-index: 3;
 }
 
-.ty-urgency-kinetic {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 20px;
-}
-
-.ty-u-line1 {
-  font-family: 'Red Hat Display', sans-serif;
-  font-size: clamp(17px, 1.9vw, 21px);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.ty-u-line2 {
-  font-family: 'Anton', sans-serif;
-  font-size: clamp(46px, 7.4vw, 96px);
-  line-height: 0.98;
-  color: var(--yellow);
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  transform: rotate(-1.2deg);
-  margin: 6px 0;
-}
-
-.ty-u-line3 {
-  font-family: 'Red Hat Display', sans-serif;
-  font-size: clamp(19px, 2.2vw, 25px);
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.ty-urgency-sub {
-  max-width: 560px;
-  margin: 18px auto 0;
-  font-size: clamp(14px, 1.5vw, 16px);
-  color: rgba(255, 255, 255, 0.55);
+/* Contained alert-box treatment — same design language as the homepage's
+   small pill badge (bordered, tinted, pulsing dot), scaled up to hold a
+   full statement instead of a short label. A big bare display-type
+   treatment here read as sensationalist for a B2B security page; this
+   reads as a genuine, serious notice instead. */
+.ty-alert-box {
+  max-width: 700px;
+  margin: 0 auto 28px;
+  padding: 24px 30px;
+  border-radius: 18px;
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  background: rgba(231, 76, 60, 0.08);
   text-align: center;
+}
+
+.ty-alert-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red-alert);
+  margin-bottom: 12px;
+}
+
+.ty-alert-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red-alert);
+  animation: alertPulse 2s ease-in-out infinite;
+}
+
+.ty-alert-text {
+  font-size: clamp(16px, 1.9vw, 19px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ty-alert-text strong {
+  color: var(--white);
+  font-weight: 800;
 }
 
 .ty-kinetic-heading {

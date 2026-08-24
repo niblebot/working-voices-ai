@@ -784,14 +784,16 @@ export default function QuizClient() {
         <div className="hero-glow hero-glow-2"></div>
         <div className="section-header ty-hook-content">
           <span className="section-label">Test Yourself</span>
-          <div className="ty-urgency-kinetic">
-            <span className="ty-u-line1">Every business is under</span>
-            <span className="ty-u-line2">RELENTLESS ATTACK</span>
-            <span className="ty-u-line3">from criminal networks</span>
+          <div className="ty-alert-box">
+            <div className="ty-alert-label">
+              <span className="ty-alert-dot"></span> Security Alert
+            </div>
+            <p className="ty-alert-text">
+              <strong>Every business</strong> is under relentless attack from{' '}
+              <strong>criminal networks</strong>. They use the latest AI technology to trick
+              your employees into letting them in.
+            </p>
           </div>
-          <p className="ty-urgency-sub">
-            They use the latest AI technology to trick your employees into letting them in.
-          </p>
           <h2 className="ty-kinetic-heading">
             <span className="ty-k-line1">Could you</span>
             <span className="ty-k-line2">spot a</span>

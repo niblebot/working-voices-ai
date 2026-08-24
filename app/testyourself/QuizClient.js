@@ -305,11 +305,17 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // invariant every time the stage changes, actively pausing every other
   // clip — a cheap safety net against two clips ever audibly overlapping,
   // regardless of what caused a stray one to still be playing.
+  //
+  // Unmuting happens here too, right when a clip becomes genuinely active —
+  // see the comment on primeSequentially below for why priming deliberately
+  // never restores sound on its own.
   useEffect(() => {
     if (typeof stage !== 'number') return;
     mediaRefs.current.forEach((el, i) => {
       if (!el) return;
       if (i === stage) {
+        el.muted = false;
+        el.volume = 1;
         el.play().catch(() => {});
       } else if (!el.paused) {
         el.pause();
@@ -457,6 +463,14 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // iOS Safari seems to need genuine confirmation that playback started
   // before it'll trust a later, gesture-less play() call to include sound,
   // which is what silently broke audio on mobile.
+  //
+  // Deliberately stays muted/silent after priming instead of restoring
+  // sound immediately — sequential priming alone didn't fix the overlap on
+  // macOS Safari, and iOS was skipping straight to audible playback with
+  // no countdown, which both point at WebKit not fully honouring mute
+  // during this touch-and-release. Unmuting only happens once, later, in
+  // the stage-change effect below, at the exact moment a clip is genuinely
+  // about to play for real — never speculatively here.
   async function primeSequentially(elements) {
     for (const el of elements) {
       if (!el) continue;
@@ -466,8 +480,6 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
       await Promise.race([playPromise, new Promise((resolve) => setTimeout(resolve, 300))]);
       el.pause();
       el.currentTime = 0;
-      el.muted = false;
-      el.volume = 1;
     }
   }
 

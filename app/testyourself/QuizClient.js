@@ -787,8 +787,8 @@ export default function QuizClient() {
           <div className="ty-alert-box">
             <p className="ty-alert-text">
               <strong>Every business</strong> is under relentless attack from{' '}
-              <strong>criminal networks</strong>. They use the latest AI technology to trick
-              your employees into letting them in.
+              <strong>criminal networks</strong>. They use the latest <strong>AI technology</strong>{' '}
+              to trick your employees into letting them in.
             </p>
           </div>
           <h2 className="ty-kinetic-heading">

@@ -375,6 +375,13 @@
 .ty-locked-media-wrap-audio {
   aspect-ratio: auto;
   max-width: none;
+  /* Fixed instead of content-driven: with aspect-ratio:auto the box's
+     height came from its content, and Safari appears to size the <audio>
+     element itself very differently depending on whether it's actively
+     playing — the box visibly grew/collapsed during playback there even
+     though nothing else changed. Pinning the height removes any browser's
+     audio-element sizing quirk as a variable entirely. */
+  min-height: 240px;
   padding: 32px 0;
 }
 

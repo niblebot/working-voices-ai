@@ -441,13 +441,36 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
   // treat all of them as already-unlocked, since real playback for clip 0
   // now only starts after the "get ready" countdown, not inside this tap.
   //
+  // Primed ONE AT A TIME, not all at once — priming every clip
+  // simultaneously relied entirely on muted/volume to keep them silent
+  // while several were technically "playing" together for up to 300ms,
+  // and that isn't reliably silent on every browser (reported as two
+  // audio clips audibly overlapping right as the countdown starts, on
+  // Safari). Doing them sequentially — fully paused before the next one's
+  // play() is even called — makes it structurally impossible for two
+  // clips to be in a playing state at the same time, regardless of
+  // whether muting itself is perfectly silent. Worst case adds ~300ms per
+  // extra clip, well inside the 3-second countdown.
+  //
   // Pausing needs to wait for the play() promise to actually settle (or a
   // short timeout, whichever comes first) rather than firing instantly —
   // iOS Safari seems to need genuine confirmation that playback started
   // before it'll trust a later, gesture-less play() call to include sound,
-  // which is what silently broke audio on mobile. Bounding it to 300ms
-  // keeps the earlier "two clips visibly overlapping" glitch from coming
-  // back, since every clip here is muted and hidden the whole time anyway.
+  // which is what silently broke audio on mobile.
+  async function primeSequentially(elements) {
+    for (const el of elements) {
+      if (!el) continue;
+      el.muted = true;
+      el.volume = 0;
+      const playPromise = Promise.resolve(el.play()).catch(() => {});
+      await Promise.race([playPromise, new Promise((resolve) => setTimeout(resolve, 300))]);
+      el.pause();
+      el.currentTime = 0;
+      el.muted = false;
+      el.volume = 1;
+    }
+  }
+
   function handleStart() {
     // Guards against a second, stray invocation of this same tap — e.g. an
     // auto-scroll landing the page under a delayed/duplicate click right as
@@ -455,18 +478,7 @@ function TimedRoundPlayer({ round, type, onComplete, onTimeout }) {
     // the round twice, producing two overlapping, audible clips.
     if (startedRef.current) return;
     startedRef.current = true;
-    mediaRefs.current.forEach((el) => {
-      if (!el) return;
-      el.muted = true;
-      el.volume = 0;
-      const playPromise = Promise.resolve(el.play()).catch(() => {});
-      Promise.race([playPromise, new Promise((resolve) => setTimeout(resolve, 300))]).then(() => {
-        el.pause();
-        el.currentTime = 0;
-        el.muted = false;
-        el.volume = 1;
-      });
-    });
+    primeSequentially(mediaRefs.current);
     nextIndexRef.current = 0;
     setStage('countdown');
   }

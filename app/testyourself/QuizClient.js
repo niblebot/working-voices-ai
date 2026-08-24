@@ -785,9 +785,6 @@ export default function QuizClient() {
         <div className="section-header ty-hook-content">
           <span className="section-label">Test Yourself</span>
           <div className="ty-alert-box">
-            <div className="ty-alert-label">
-              <span className="ty-alert-dot"></span> Security Alert
-            </div>
             <p className="ty-alert-text">
               <strong>Every business</strong> is under relentless attack from{' '}
               <strong>criminal networks</strong>. They use the latest AI technology to trick
